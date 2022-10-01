@@ -1,9 +1,9 @@
 from django.apps import apps
-from django.db import models
-from django.contrib import auth
-from django.contrib.auth.models import AbstractUser, BaseUserManager, UnicodeUsernameValidator
-from django.contrib.auth.hashers import make_password
 from django.conf import settings
+from django.contrib import auth
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 WILAYA_CHOICES = [
