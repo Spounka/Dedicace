@@ -153,6 +153,9 @@ class Disponibility(models.Model):
     start_hour = models.CharField(default="09:00", max_length=10)
     end_hour = models.CharField(default="17:00", max_length=10)
 
+    def __str__(self):
+        return f"{self.start_day}-{self.end_day}"
+
     class Meta:
         verbose_name_plural = "Disponibilities"
 
@@ -164,6 +167,9 @@ class Celebrity(models.Model):
     is_available = models.BooleanField(default=True, null=False, blank=False)
     disponibility = models.OneToOneField(Disponibility, on_delete=models.SET_NULL, null=True)
 
+    def __str__(self):
+        return f"Celeb - {self.user.username}"
+
     class Meta:
         verbose_name_plural = "Celebrities"
 
@@ -171,6 +177,9 @@ class Celebrity(models.Model):
 class Fan(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     wilaya = models.CharField(max_length=35, choices=WILAYA_CHOICES, default="01")
+
+    def __str__(self):
+        return f"{self.user.username}"
 
 
 def get_user_receipt_upload_folder(instance, filename):
@@ -183,8 +192,14 @@ class Payment(models.Model):
     is_valid = models.BooleanField(default=False)
     receipt = models.ImageField(upload_to=get_user_receipt_upload_folder)
 
+    def __str__(self):
+        return f"Payment#{self.id}"
+
 
 class Request(models.Model):
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE)
     sender = models.ForeignKey(Fan, on_delete=models.CASCADE)
     recipient = models.ForeignKey(Celebrity, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.sender.user.username} {self.payment.payment_date}"
