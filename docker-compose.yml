@@ -9,6 +9,8 @@ services:
       - POSTGRES_DB=Dedicace
       - POSTGRES_USER=spounka
       - POSTGRES_PASSWORD=pass123
+    ports:
+      - "5432:5432"
 
   web:
     build: .
