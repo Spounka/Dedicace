@@ -174,7 +174,7 @@ class Fan(models.Model):
 
 
 def get_user_receipt_upload_folder(instance, filename):
-    return f'payments/{instance.payment_date}/{filename}'
+    return f'payments/{instance.payment_date}/{instance.id}/{filename}'
 
 
 class Payment(models.Model):
