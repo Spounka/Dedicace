@@ -143,6 +143,16 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['email']
     objects = UserManager()
 
+    @classmethod
+    def normalize_username(cls, username: str):
+        if username.startswith("0"):
+            return "".join(["+213", username[1:]])
+        if username.startswith("+213"):
+            if username[4] == "0":
+                return username[:3] + username[5:]
+            else:
+                return username
+
     def __str__(self):
         return f"{self.phone_number}"
 
