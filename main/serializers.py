@@ -8,13 +8,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class CelebritySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Celebrity
-        fields = "__all__"
-        depth = 1
-
-
 class FanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Fan
@@ -22,15 +15,35 @@ class FanSerializer(serializers.ModelSerializer):
         depth = 1
 
 
-class RequestSerializer(serializers.ModelSerializer):
+class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Request
+        model = Payment
         fields = "__all__"
         depth = 1
 
 
-class PaymentSerializer(serializers.ModelSerializer):
+class DisponibilitySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Payment
+        fields = "__all__"
+        depth = 2
+
+
+class CelebritySerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    disponibility = DisponibilitySerializer()
+
+    class Meta:
+        model = Celebrity
+        fields = "__all__"
+        depth = 1
+
+
+class RequestSerializer(serializers.ModelSerializer):
+    payment = PaymentSerializer()
+    sender = FanSerializer()
+    recipient = CelebritySerializer()
+
+    class Meta:
+        model = Request
         fields = "__all__"
         depth = 1
