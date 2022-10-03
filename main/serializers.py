@@ -29,9 +29,6 @@ class DisponibilitySerializer(serializers.ModelSerializer):
 
 
 class CelebritySerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-    disponibility = DisponibilitySerializer()
-
     class Meta:
         model = Celebrity
         fields = "__all__"
@@ -39,10 +36,6 @@ class CelebritySerializer(serializers.ModelSerializer):
 
 
 class RequestSerializer(serializers.ModelSerializer):
-    payment = PaymentSerializer()
-    sender = FanSerializer()
-    recipient = CelebritySerializer()
-
     class Meta:
         model = Request
         fields = "__all__"
