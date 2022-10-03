@@ -216,7 +216,9 @@ class Request(models.Model):
 
 
 class Report(models.Model):
-    reporter = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
-    reported = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    reporter = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+                                 related_name="report_sender")
+    reported = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+                                 related_name="report_recipient")
     report_date = models.PositiveBigIntegerField(default=0)
     report_reason = models.TextField(default="Report Reason")
