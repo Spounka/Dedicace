@@ -10,5 +10,9 @@ router.register(r"requests", views.RequestViewSet, basename="requests")
 router.register(r"payments", views.PaymentViewSet, basename="payments")
 
 urlpatterns = [
-    path('', include(router.urls))
+    path(r"user/update/<int:pk>/", views.FanAPIView.as_view(), name="hello"),
+    path(r"users/create/", views.CreateFanAPIView.as_view(), name="oss"),
+    path(r"current/", views.GetCurrentUser.as_view(), name="logout"),
+    path(r"auth/", include("knox.urls")),
+    path('', include(router.urls)),
 ]
