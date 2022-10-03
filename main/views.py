@@ -1,38 +1,20 @@
 from knox.auth import TokenAuthentication
 from rest_framework import viewsets, generics, mixins, response, status
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
 from .models import User, Celebrity, Fan, Request, Payment
 from .serializers import UserSerializer, CelebritySerializer, FanSerializer, RequestSerializer, PaymentSerializer
 
 
-# Create your views here.
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
 class CelebrityViewSet(viewsets.ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = Celebrity.objects.all()
     serializer_class = CelebritySerializer
 
 
-class FanViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Fan.objects.all()
-    serializer_class = FanSerializer
-
-
-class RequestViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Request.objects.all()
-    serializer_class = RequestSerializer
-
-
-class PaymentViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
-
-
 class FanAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = FanSerializer
     queryset = Fan.objects.all()
 
