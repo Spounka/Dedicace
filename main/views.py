@@ -1,3 +1,4 @@
+from knox.auth import TokenAuthentication
 from rest_framework import viewsets, generics, mixins, response, status
 from rest_framework.views import APIView
 
@@ -59,3 +60,13 @@ class CreateFanAPIView(APIView, mixins.CreateModelMixin):
             serializer.save()
             return response.Response(data={"status": "success"})
         return response.Response(data={"status": "failed"})
+
+
+class GetCurrentUser(APIView):
+    authentication_classes = (TokenAuthentication,)
+
+    def get(self, request):
+        user = User.objects.get(pk=request.user.id)
+        fan = Fan.objects.get(user=user)
+        fan_serialiszer = FanSerializer(fan)
+        return response.Response(data=fan_serialiszer.data, status=status.HTTP_200_OK)
