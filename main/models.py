@@ -213,3 +213,10 @@ class Request(models.Model):
 
     def __str__(self):
         return f"{self.sender.user.username} {self.payment.payment_date}"
+
+
+class Report(models.Model):
+    reporter = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    reported = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL)
+    report_date = models.PositiveBigIntegerField(default=0)
+    report_reason = models.TextField(default="Report Reason")
