@@ -171,7 +171,7 @@ class Disponibility(models.Model):
 
 
 class Celebrity(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     description = models.TextField(default="")
     price = models.FloatField(default=0.0)
     is_available = models.BooleanField(default=True, null=False, blank=False)
@@ -185,7 +185,7 @@ class Celebrity(models.Model):
 
 
 class Fan(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     wilaya = models.CharField(max_length=35, choices=WILAYA_CHOICES, default="01")
 
     def __str__(self):
