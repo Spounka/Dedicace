@@ -135,7 +135,7 @@ class UserManager(BaseUserManager):
 
 # Create your models here.
 class User(AbstractUser):
-    phone_number = models.CharField(default="+213", max_length=15, unique=True)
+    phone_number = models.CharField(default="+213", max_length=20, unique=True)
     ccp = models.CharField(default="0024242424/24", max_length=50)
 
     EMAIL_FIELD = "email"
