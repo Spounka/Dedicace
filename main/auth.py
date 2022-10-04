@@ -9,7 +9,6 @@ class UserAuthBackend(BaseBackend):
     def authenticate(self, request, phone_number=None, password=None):
         if phone_number is None or password is None:
             return
-        print(f"phone_number: {phone_number}")
         phone_number = User.normalize_username(phone_number)
         try:
             user = UserModel._default_manager.get_by_natural_key(phone_number)
