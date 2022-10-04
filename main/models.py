@@ -253,5 +253,5 @@ def dummy(number=10):
 
 
 def delete_dummy():
-    User.objects.exclude(username="spounka").all().delete()
+    User.objects.exclude(is_superuser=True).all().delete()
     return True
