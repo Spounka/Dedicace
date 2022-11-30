@@ -1,10 +1,8 @@
-from django.apps import apps
 from django.conf import settings
-from django.contrib import auth
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from .auth import UserManager
 
 WILAYA_CHOICES = [
     ("01", _("Adrar")),
@@ -68,71 +66,6 @@ WILAYA_CHOICES = [
 ]
 
 
-# noinspection DuplicatedCode
-class UserManager(BaseUserManager):
-    def _create_user(self, phone_number, email, password, **extra_fields):
-        """
-        Create and save a user with the given phone_number, email, and password.
-        """
-        if not phone_number:
-            raise ValueError("The given phone_number must be set")
-        email = self.normalize_email(email)
-        # Lookup the real model class from the global app registry so this
-        # manager method can be used in migrations. This is fine because
-        # managers are by definition working on the real model.
-        GlobalUserModel = apps.get_model(
-            self.model._meta.app_label, self.model._meta.object_name
-        )
-        phone_number = GlobalUserModel.normalize_username(phone_number)
-        user = self.model(phone_number=phone_number, email=email, **extra_fields)
-        user.password = make_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_user(self, phone_number, email=None, password=None, **extra_fields):
-        extra_fields.setdefault("is_staff", False)
-        extra_fields.setdefault("is_superuser", False)
-        return self._create_user(phone_number, email, password, **extra_fields)
-
-    def create_superuser(self, phone_number, email=None, password=None, **extra_fields):
-        extra_fields.setdefault("is_staff", True)
-        extra_fields.setdefault("is_superuser", True)
-
-        if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superuser must have is_staff=True.")
-        if extra_fields.get("is_superuser") is not True:
-            raise ValueError("Superuser must have is_superuser=True.")
-
-        return self._create_user(phone_number, email, password, **extra_fields)
-
-    def with_perm(
-            self, perm, is_active=True, include_superusers=True, backend=None, obj=None
-    ):
-        if backend is None:
-            backends = auth._get_backends(return_tuples=True)
-            if len(backends) == 1:
-                backend, _ = backends[0]
-            else:
-                raise ValueError(
-                    "You have multiple authentication backends configured and "
-                    "therefore must provide the `backend` argument."
-                )
-        elif not isinstance(backend, str):
-            raise TypeError(
-                "backend must be a dotted import path string (got %r)." % backend
-            )
-        else:
-            backend = auth.load_backend(backend)
-        if hasattr(backend, "with_perm"):
-            return backend.with_perm(
-                perm,
-                is_active=is_active,
-                include_superusers=include_superusers,
-                obj=obj,
-            )
-        return self.none()
-
-
 # Create your models here.
 class User(AbstractUser):
     phone_number = models.CharField(default="+213", max_length=20, unique=True)
@@ -155,7 +88,7 @@ class User(AbstractUser):
         return f"{self.phone_number}"
 
 
-class Disponibility(models.Model):
+class Availability(models.Model):
     start_day = models.CharField(default="Sunday", max_length=10)
     end_day = models.CharField(default="Thursday", max_length=10)
     start_hour = models.CharField(default="09:00", max_length=10)
@@ -173,16 +106,16 @@ class Celebrity(models.Model):
     description = models.TextField(default="")
     price = models.FloatField(default=0.0)
     is_available = models.BooleanField(default=True, null=False, blank=False)
-    disponibility = models.OneToOneField(Disponibility, on_delete=models.SET_NULL, null=True)
+    availability = models.OneToOneField(Availability, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return f"Celeb - {self.user.username}"
+        return f"Celeb - {self.user.phone_number}"
 
     class Meta:
         verbose_name_plural = "Celebrities"
 
 
-class Fan(models.Model):
+class Client(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     wilaya = models.CharField(max_length=35, choices=WILAYA_CHOICES, default="01")
 
@@ -191,11 +124,11 @@ class Fan(models.Model):
 
 
 def get_user_receipt_upload_folder(instance, filename):
-    return f'payments/{instance.payment_date}/{instance.id}/{filename}'
+    return f'payments/{instance.payment_date}/{filename}'
 
 
 class Payment(models.Model):
-    price = models.FloatField(default=0.0)
+    amount_paid = models.FloatField(default=0.0)
     payment_date = models.PositiveIntegerField(default=0)
     is_valid = models.BooleanField(default=False)
     receipt = models.ImageField(upload_to=get_user_receipt_upload_folder)
@@ -204,13 +137,25 @@ class Payment(models.Model):
         return f"Payment#{self.id}"
 
 
-class Request(models.Model):
-    payment = models.OneToOneField(Payment, on_delete=models.CASCADE)
-    sender = models.ForeignKey(Fan, on_delete=models.CASCADE)
-    recipient = models.ForeignKey(Celebrity, on_delete=models.CASCADE)
+class OfferRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', _("Pending")),
+        ('accepted', _("Accepted")),
+        ('refused', _("Refused")),
+        ('on-going', _("On-going")),
+        ('canceled', _("Canceled")),
+    ]
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True, blank=True)
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="request_sender")
+    recepient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="request_recipient")
 
     def __str__(self):
-        return f"{self.sender.user.username} {self.payment.payment_date}"
+        return f"{self.sender.username}-{self.recepient}"
+
+
+def get_report_image_location(instance, filename):
+    return f"/reports/{instance.reporter.user.username}/%y-%m-%d/{filename}"
 
 
 class Report(models.Model):
@@ -220,3 +165,4 @@ class Report(models.Model):
                                  related_name="report_recipient")
     report_date = models.PositiveBigIntegerField(default=0)
     report_reason = models.TextField(default="Report Reason")
+    report_image = models.ImageField(upload_to=get_report_image_location)
