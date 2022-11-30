@@ -132,3 +132,8 @@ dmypy.json
 # Docker db stuff
 data/
 
+requirements.txt.bak
+
+url_schem.json
+
+conception/

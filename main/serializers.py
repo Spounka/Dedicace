@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Celebrity, Fan, Request, Payment, Report
+from .models import User, Celebrity, Client, OfferRequest, Payment, Report
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -10,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class FanSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Fan
+        model = Client
         fields = "__all__"
         depth = 1
 
@@ -37,9 +37,9 @@ class CelebritySerializer(serializers.ModelSerializer):
 
 class RequestSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Request
+        model = OfferRequest
         fields = "__all__"
-        depth = 1
+        depth = 2
 
 
 class ReportSerializer(serializers.ModelSerializer):
@@ -47,3 +47,8 @@ class ReportSerializer(serializers.ModelSerializer):
         model = Report
         fields = "__all__"
         depth = 2
+
+
+class DummySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DummyImageUpload

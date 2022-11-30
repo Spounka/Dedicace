@@ -1,5 +1,5 @@
 import random
-from .models import User, Celebrity, Fan
+from .models import User, Celebrity, Client
 
 
 def create_dummy_user(i: int, offset: int = 0):
@@ -21,7 +21,7 @@ def create_dummy_celebs(number=10, offset: int = 0):
 def create_dummy_fans(number=10, offset: int = 0):
     for i in range(number):
         wilaya = random.randint(1, 58)
-        fan = Fan.objects.create(user=create_dummy_user(i, offset), wilaya=f"{wilaya}")
+        fan = Client.objects.create(user=create_dummy_user(i, offset), wilaya=f"{wilaya}")
         fan.save()
 
 
