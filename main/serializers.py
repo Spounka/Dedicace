@@ -47,8 +47,3 @@ class ReportSerializer(serializers.ModelSerializer):
         model = Report
         fields = "__all__"
         depth = 2
-
-
-class DummySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DummyImageUpload

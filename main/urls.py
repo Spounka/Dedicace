@@ -3,5 +3,5 @@ from . import views
 
 urlpatterns = [
     path(r"auth/", include("knox.urls")),
-    path(r'client/'),
+    # path(r'client/'),
 ]
