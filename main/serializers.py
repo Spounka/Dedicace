@@ -8,7 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class FanSerializer(serializers.ModelSerializer):
+class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
         fields = "__all__"
@@ -22,7 +22,7 @@ class PaymentSerializer(serializers.ModelSerializer):
         depth = 1
 
 
-class DisponibilitySerializer(serializers.ModelSerializer):
+class AvailabilitySerializer(serializers.ModelSerializer):
     class Meta:
         fields = "__all__"
         depth = 2
@@ -35,11 +35,11 @@ class CelebritySerializer(serializers.ModelSerializer):
         depth = 1
 
 
-class RequestSerializer(serializers.ModelSerializer):
+class OfferRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfferRequest
         fields = "__all__"
-        depth = 2
+        depth = 1
 
 
 class ReportSerializer(serializers.ModelSerializer):

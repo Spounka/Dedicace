@@ -1,8 +1,10 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from .manager import UserManager
+from rest_framework.parsers import MultiPartParser
 
 WILAYA_CHOICES = [
     ("01", _("Adrar")),
@@ -68,6 +70,21 @@ WILAYA_CHOICES = [
 
 # Create your models here.
 class User(AbstractUser):
+    username_validator = UnicodeUsernameValidator()
+    username = models.CharField(
+        _("username"),
+        max_length=150,
+        unique=False,
+        null=True,
+        help_text=_(
+            "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+        ),
+        validators=[username_validator],
+        error_messages={
+            "unique": _("A user with that username already exists."),
+        },
+    )
+
     phone_number = models.CharField(default="+213", max_length=20, unique=True)
     ccp = models.CharField(default="0024242424/24", max_length=50)
 
@@ -102,11 +119,11 @@ class Availability(models.Model):
 
 
 class Celebrity(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     description = models.TextField(default="")
     price = models.FloatField(default=0.0)
     is_available = models.BooleanField(default=True, null=False, blank=False)
-    availability = models.OneToOneField(Availability, on_delete=models.SET_NULL, null=True)
+    user: User = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    availability: Availability = models.OneToOneField(Availability, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return f"Celeb - {self.user.phone_number}"
@@ -116,7 +133,7 @@ class Celebrity(models.Model):
 
 
 class Client(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user: User = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     wilaya = models.CharField(max_length=35, choices=WILAYA_CHOICES, default="01")
 
     def __str__(self):
@@ -146,9 +163,11 @@ class OfferRequest(models.Model):
         ('canceled', _("Canceled")),
     ]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-    payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True, blank=True)
-    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="request_sender")
-    recepient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="request_recipient")
+    payment: Payment = models.OneToOneField(Payment, on_delete=models.SET_NULL, null=True, blank=True)
+    sender: User = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="request_sender")
+    recepient: User = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+                                        related_name="request_recepient")
+    description = models.TextField()
 
     def __str__(self):
         return f"{self.sender.username}-{self.recepient}"
@@ -159,10 +178,10 @@ def get_report_image_location(instance, filename):
 
 
 class Report(models.Model):
-    reporter = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-                                 related_name="report_sender")
-    reported = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
-                                 related_name="report_recipient")
+    reporter: User = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+                                       related_name="report_sender")
+    reported: User = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+                                       related_name="report_recipient")
     report_date = models.PositiveBigIntegerField(default=0)
     report_reason = models.TextField(default="Report Reason")
     report_image = models.ImageField(upload_to=get_report_image_location)

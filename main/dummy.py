@@ -1,5 +1,10 @@
 import random
 from .models import User, Celebrity, Client
+from django_fakery import factory
+
+
+def create_something():
+    m = factory.m(Client)(wilaya="34")
 
 
 def create_dummy_user(i: int, offset: int = 0):

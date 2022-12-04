@@ -88,11 +88,16 @@ WSGI_APPLICATION = 'dedicace.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE':   'django.db.backends.postgresql_psycopg2',
+        'ENGINE':   'django.db.backends.postgresql',
         'NAME':     os.environ.get("POSTGRES_DB"),
         'USER':     os.environ.get("POSTGRES_USER"),
         'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
         'HOST':     "db",
+        # 'NAME':     "Dedicace",
+        # 'USER':     "spounka",
+        # 'PASSWORD': "pass123",
+        # 'HOST':     "localhost",
+        # 'PORT':     5432,
     }
 }
 
@@ -131,6 +136,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
 
@@ -138,3 +145,4 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+FILE_UPLOAD_PERMISSIONS = 0o644

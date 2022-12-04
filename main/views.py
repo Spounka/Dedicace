@@ -1,107 +1,218 @@
 from knox.auth import TokenAuthentication
 from rest_framework import generics, mixins, response, status
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import BasicAuthentication
-from rest_framework.parsers import FormParser, MultiPartParser
+from django.contrib.auth.hashers import make_password
 
 from .models import User, Celebrity, Client, OfferRequest, Payment, models
 from .serializers import (
-    UserSerializer, CelebritySerializer, FanSerializer,
-    RequestSerializer, PaymentSerializer,
+    UserSerializer, CelebritySerializer, ClientSerializer,
+    OfferRequestSerializer, PaymentSerializer,
 )
 
 
-class CelebrityAPIView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+class ViewCurrentModel(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
+    model = None
+
+    def retrieve(self, request, *args, **kwargs):
+        obj = self.model.objects.filter(user_id=request.user.id).first()
+        if obj:
+            return response.Response(self.serializer_class(obj).data)
+        return response.Response(status.HTTP_403_FORBIDDEN)
+
+
+class UserCreateAPIView(generics.CreateAPIView):
+    serializer_class = ClientSerializer
+    model = None
+    args_to_add = {}
+
+    def create(self, request, *args, **kwargs):
+        phone_number = User.normalize_username(request.data.get('phone_number'))
+        user: User = User.objects.create(phone_number=phone_number, email=request.data.get('email'),
+                                         ccp=request.data.get('ccp'))
+        user.set_password(request.data.get('password'))
+        obj = self.model.objects.create(user=user, **self.args_to_add)
+        obj.save()
+
+        serializer = self.get_serializer(obj)
+        return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class WithUserSupportAPIView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
+    model = None
+
+    def update(self, request, *args, **kwargs):
+        if not self.is_editing_self(request, args, kwargs):
+            return response.Response(status=status.HTTP_403_FORBIDDEN)
+
+        # makes sure we don't accidentally change user's id
+        request.data.pop('id', None)
+
+        user_data: dict[str, str] = request.data.pop('user', None)
+        user: User = self.get_object().user
+        if user_data:
+            # if we changed the password, we have to hash it, so we don't store it raw
+            if user_data.get('password', None):
+                user_data['password'] = make_password(user_data['password'])
+            if user_data.get('phone_number', None):
+                user_data['phone_number'] = User.normalize_username(user_data['phone_number'])
+
+            # remove fields that may cause vulnerabilities
+            user_data.pop('id', None)
+            user_data.pop('is_superuser', None)
+            user_data.pop('is_staff', None)
+            user_data.pop('is_active', None)
+            user_data.pop('groups', None)
+            user_data.pop('user_permissions', None)
+
+            user_serializer = UserSerializer(instance=user, data=user_data, partial=True)
+            user_serializer.is_valid(raise_exception=True)
+            user_serializer.save()
+        return super().update(request, args, kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        if not self.is_editing_self(request, args, kwargs):
+            return response.Response(status=status.HTTP_403_FORBIDDEN)
+        request.user.delete()
+        return response.Response(status=status.HTTP_204_NO_CONTENT)
+
+    def retrieve(self, request, *args, **kwargs):
+        if not self.is_editing_self(request, args, kwargs) and not hasattr(request.user, 'celebrity'):
+            return response.Response(status=status.HTTP_403_FORBIDDEN)
+        return super().retrieve(request, args, kwargs)
+
+    def is_editing_self(self, request, *args, **kwargs) -> bool:
+        obj = self.model.objects.filter(user_id=request.user.pk).first()
+        if not obj:
+            return False
+        return True
+
+
+class ClientCurrent(ViewCurrentModel):
+    serializer_class = ClientSerializer
+    model = Client
+
+
+class ClientCreate(UserCreateAPIView):
+    serializer_class = ClientSerializer
+    model = User
+
+    def create(self, request, *args, **kwargs):
+        self.args_to_add['wilaya'] = request.data.get('wilaya', '01')
+        return super().create(request, args, kwargs)
+
+
+class ClientReadUpdateDestroyAPIView(WithUserSupportAPIView):
+    serializer_class = ClientSerializer
+    queryset = Client.objects.filter()
+    model = Client
+
+
+class CelebrityCurrent(ViewCurrentModel):
+    serializer_class = CelebritySerializer
+    model = Celebrity
+
+
+class CelebrityList(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
     serializer_class = CelebritySerializer
     queryset = Celebrity.objects.all()
 
 
-class FanAPIView(generics.RetrieveUpdateAPIView):
+class CelebrityCreate(UserCreateAPIView):
+    serializer_class = CelebritySerializer
+    model = Celebrity
+
+    def create(self, request, *args, **kwargs):
+        self.args_to_add['price'] = request.data.get('price', '00')
+        self.args_to_add['is_available'] = request.data.get('is_available', True)
+        self.args_to_add['availability'] = request.data.get('availability', None)
+        return super().create(request, args, kwargs)
+
+
+class CelebrityReadUpdateAPIView(WithUserSupportAPIView):
+    serializer_class = CelebritySerializer
+    queryset = Celebrity.objects.filter()
+    model = Celebrity
+
+
+class RelatedOffersReadUpdate(generics.ListCreateAPIView, mixins.RetrieveModelMixin):
     permission_classes = [IsAuthenticated]
-    serializer_class = FanSerializer
-    queryset = Client.objects.all()
-
-
-class FanDestroyAPIView(generics.RetrieveUpdateAPIView):
-    permission_classes = [IsAuthenticated, ]
-    serializer_class = FanSerializer
-    queryset = Client.objects.all()
-
-
-class CreateFanAPIView(APIView, mixins.CreateModelMixin):
-    def post(self, request):
-        if not request.data.get('user'):
-            return response.Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "user is empty"})
-        user_serializer = UserSerializer(data=request.data['user'])
-        if not user_serializer.is_valid(raise_exception=True):
-            return response.Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "user invalid"})
-        user = user_serializer.save()
-        user.phone_number = User.normalize_username(user.phone_number)
-        user.save()
-
-        serializer = FanSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.validated_data['user'] = user
-            serializer.save()
-            return response.Response(data={"message": "success"})
-        return response.Response(data={"message": "failed"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class GetCurrentUser(APIView):
     authentication_classes = (TokenAuthentication,)
-    permission_classes = [IsAuthenticated]
+    serializer_class = OfferRequestSerializer
 
-    def get(self, request):
-        user = User.objects.filter(pk=request.user.id)[0]
-        if not user:
-            return response.Response(data={"message": "user not found"}, status=status.HTTP_400_BAD_REQUEST)
-        fan = Client.objects.filter(user=user)
-        if fan[0]:
-            fan_serialiszer = FanSerializer(fan[0])
-            return response.Response(data={**fan_serialiszer.data}, status=status.HTTP_200_OK)
-        celebrity = Celebrity.objects.filter(user=user)
-        if celebrity[0]:
-            celeb_serialiszer = CelebritySerializer(celebrity[0])
-            return response.Response(data=celeb_serialiszer.data, status=status.HTTP_200_OK)
-        user_serializer = UserSerializer(user)
-        return response.Response(data=user_serializer.data, status=status.HTTP_200_OK)
+    def create(self, request, *args, **kwargs):
+        serializer: OfferRequestSerializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.validated_data['sender'] = request.user
+        celebrity = Celebrity.objects.filter(pk=request.data.get('recepient')).first()
+        if not celebrity:
+            return response.Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer.validated_data['recepient'] = celebrity.user
+        serializer.save()
+        return response.Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
-
-class RequestsAPIView(generics.GenericAPIView, mixins.ListModelMixin):
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication, BasicAuthentication)
+    def get(self, request, *args, **kwargs):
+        if kwargs.get('pk', None):
+            if OfferRequest.objects.get(pk=kwargs['pk']).sender != request.user:
+                return response.Response(status=status.HTTP_403_FORBIDDEN)
+            return super().retrieve(request, args, kwargs)
+        return super().get(request, args, kwargs)
 
     def list(self, request, *args, **kwargs):
-        user = User.objects.filter(pk=request.user.pk).all()
-        if user[0].request_sender:
-            serializer = RequestSerializer(user[0].request_sender.all(), many=True)
-        else:
-            serializer = RequestSerializer(user[0].request_recipient.all(), many=True)
-        return response.Response(data=serializer.data, status=status.HTTP_200_OK)
+        if hasattr(request.user, 'client'):
+            offers = OfferRequest.objects.filter(sender=request.user)
+            serializer = OfferRequestSerializer(offers, many=True)
+            return response.Response(data=serializer.data, status=status.HTTP_200_OK)
+        elif hasattr(request.user, 'celebrity'):
+            offers = OfferRequest.objects.filter(recepient=request.user)
+            serializer = OfferRequestSerializer(offers, many=True)
+            return response.Response(data=serializer.data, status=status.HTTP_200_OK)
+        return response.Response(status=status.HTTP_403_FORBIDDEN)
 
-    def get(self, request):
-        return self.list(request)
 
-
-class RequestCreateAPIView(generics.GenericAPIView):
+class PaymentAPIView(generics.ListCreateAPIView, mixins.RetrieveModelMixin):
     authentication_classes = (TokenAuthentication,)
     permission_classes = [IsAuthenticated]
+    queryset = Payment.objects.filter()
+    serializer_class = PaymentSerializer
 
-    def post(self, request, *args, **kwargs):
-        request_serializer = RequestSerializer(data=request.data)
-        if not request_serializer.is_valid():
-            return response.Response(status=status.HTTP_400_BAD_REQUEST, data=request_serializer.errors)
-        request_serializer.validated_data['sender'] = request.user
-        recepient = User.objects.filter(pk=request.data.get('recepient')).first()
-        request_serializer.validated_data['recepient'] = recepient
-        payment_serializer = PaymentSerializer(data=request.data.get('payment'))
-        if not payment_serializer.is_valid:
-            return response.Response(status=status.HTTP_400_BAD_REQUEST, data=payment_serializer.errors)
-        # payment_serializer.is_valid(raise_exception=True)
-        # payment_serializer.validated_data['receipt'] = request.data.get('receipt')
-        # payment_serializer.save()
-        # request_serializer.validated_data['payment'] = payment_serializer.data
-        request_serializer.save()
-        return response.Response(status=status.HTTP_200_OK, data=request_serializer.data)
+    def get(self, request, *args, **kwargs):
+        if kwargs.get('pk', None):
+            if Payment.objects.get(pk=kwargs['pk']).offerrequest.sender != request.user:
+                return response.Response(status=status.HTTP_403_FORBIDDEN)
+            return super().retrieve(request, args, kwargs)
+        return super().get(request, args, kwargs)
+
+    def list(self, request, *args, **kwargs):
+        if hasattr(request.user, 'client'):
+            offers = Payment.objects.filter(offerrequest__sender=request.user)
+            payment_serializer = PaymentSerializer(offers, many=True)
+            return response.Response(data=payment_serializer.data, status=status.HTTP_200_OK)
+        elif hasattr(request.user, 'celebrity'):
+            offers = Payment.objects.filter(offerrequest__recepient=request.user)
+            payment_serializer = PaymentSerializer(offers, many=True)
+            return response.Response(data=payment_serializer.data, status=status.HTTP_200_OK)
+        return response.Response(status=status.HTTP_403_FORBIDDEN)
+
+
+class CelebOfferRequestPayment(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
+    serializer_class = PaymentSerializer
+
+    def get(self, request, *args, **kwargs):
+        offer = OfferRequest.objects.filter(pk=kwargs['pk']).first()
+        if not offer:
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
+        if offer.recepient != request.user:
+            return response.Response(status=status.HTTP_403_FORBIDDEN)
+        if not hasattr(offer, "payment"):
+            return response.Response(data={"message": "Offer has no payment yet"}, status=status.HTTP_400_BAD_REQUEST)
+        payment_serializer = PaymentSerializer(offer.payment)
+        return response.Response(data=payment_serializer.data, status=status.HTTP_200_OK)
