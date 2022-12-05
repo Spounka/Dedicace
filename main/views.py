@@ -1,13 +1,14 @@
+from django.db.models import ImageField
 from knox.auth import TokenAuthentication
 from rest_framework import generics, mixins, response, status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import BasicAuthentication
 from django.contrib.auth.hashers import make_password
+from rest_framework.parsers import MultiPartParser, FormParser
 
-from .models import User, Celebrity, Client, OfferRequest, Payment, models
+from .models import User, Celebrity, Client, OfferRequest, Payment, Report
 from .serializers import (
-    UserSerializer, CelebritySerializer, ClientSerializer,
-    OfferRequestSerializer, PaymentSerializer,
+    UserSerializer, CelebritySerializer, ClientSerializer, OfferRequestSerializer,
+    PaymentSerializer, AvailabilitySerializer, ReportSerializer
 )
 
 
@@ -81,7 +82,7 @@ class WithUserSupportAPIView(generics.RetrieveUpdateDestroyAPIView):
         return response.Response(status=status.HTTP_204_NO_CONTENT)
 
     def retrieve(self, request, *args, **kwargs):
-        if not self.is_editing_self(request, args, kwargs) and not hasattr(request.user, 'celebrity'):
+        if not self.is_editing_self(request, args, kwargs) and not request.user.is_celebrity():
             return response.Response(status=status.HTTP_403_FORBIDDEN)
         return super().retrieve(request, args, kwargs)
 
@@ -165,11 +166,11 @@ class RelatedOffersReadUpdate(generics.ListCreateAPIView, mixins.RetrieveModelMi
         return super().get(request, args, kwargs)
 
     def list(self, request, *args, **kwargs):
-        if hasattr(request.user, 'client'):
+        if request.user.is_client():
             offers = OfferRequest.objects.filter(sender=request.user)
             serializer = OfferRequestSerializer(offers, many=True)
             return response.Response(data=serializer.data, status=status.HTTP_200_OK)
-        elif hasattr(request.user, 'celebrity'):
+        elif request.user.is_celebrity():
             offers = OfferRequest.objects.filter(recepient=request.user)
             serializer = OfferRequestSerializer(offers, many=True)
             return response.Response(data=serializer.data, status=status.HTTP_200_OK)
@@ -190,21 +191,22 @@ class PaymentAPIView(generics.ListCreateAPIView, mixins.RetrieveModelMixin):
         return super().get(request, args, kwargs)
 
     def list(self, request, *args, **kwargs):
-        if hasattr(request.user, 'client'):
+        if request.user.is_client():
             offers = Payment.objects.filter(offerrequest__sender=request.user)
             payment_serializer = PaymentSerializer(offers, many=True)
             return response.Response(data=payment_serializer.data, status=status.HTTP_200_OK)
-        elif hasattr(request.user, 'celebrity'):
+        elif request.user.is_celebrity():
             offers = Payment.objects.filter(offerrequest__recepient=request.user)
             payment_serializer = PaymentSerializer(offers, many=True)
             return response.Response(data=payment_serializer.data, status=status.HTTP_200_OK)
         return response.Response(status=status.HTTP_403_FORBIDDEN)
 
 
-class CelebOfferRequestPayment(generics.RetrieveUpdateAPIView):
+class ViewOfferRequestPayment(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = (TokenAuthentication,)
     serializer_class = PaymentSerializer
+    queryset = Payment.objects.filter()
 
     def get(self, request, *args, **kwargs):
         offer = OfferRequest.objects.filter(pk=kwargs['pk']).first()
@@ -216,3 +218,58 @@ class CelebOfferRequestPayment(generics.RetrieveUpdateAPIView):
             return response.Response(data={"message": "Offer has no payment yet"}, status=status.HTTP_400_BAD_REQUEST)
         payment_serializer = PaymentSerializer(offer.payment)
         return response.Response(data=payment_serializer.data, status=status.HTTP_200_OK)
+
+    def partial_update(self, request, *args, **kwargs):
+        offer = OfferRequest.objects.filter(pk=kwargs.get('pk')).first()
+        if request.user != offer.sender or request.user != offer.recepient:
+            return response.Response(status=status.HTTP_403_FORBIDDEN)
+        return super().partial_update(request, args, kwargs)
+
+
+class ReportAPIView(generics.ListCreateAPIView, mixins.RetrieveModelMixin):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
+    serializer_class = ReportSerializer
+    queryset = Report.objects.filter()
+    parser_classes = (MultiPartParser,)
+
+    def get(self, request, *args, **kwargs):
+        if kwargs.get('pk', None):
+            return self.retrieve(request, args, kwargs)
+        return super().get(request, args, kwargs)
+
+    def list(self, request, *args, **kwargs):
+        if not request.user.is_celebrity():
+            return response.Response(status=status.HTTP_403_FORBIDDEN)
+        reports = Report.objects.filter(reporter=request.user)
+        serializer = ReportSerializer(reports, many=True)
+        return response.Response(status=status.HTTP_200_OK, data=serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_celebrity():
+            return response.Response(status=status.HTTP_403_FORBIDDEN)
+        reported = Client.objects.filter(pk=request.data.get('reported')).first()
+        if not reported:
+            return response.Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "User not found"})
+        report_serializer = ReportSerializer(data=request.data)
+        report_serializer.is_valid(raise_exception=True)
+        report_serializer.validated_data['reporter'] = request.user
+        report_serializer.validated_data['reported'] = reported.user
+        report_serializer.save()
+        return response.Response(status=status.HTTP_201_CREATED, data=report_serializer.data)
+
+
+class AvailabilityAPIView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
+    serializer_class = AvailabilitySerializer
+
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_celebrity():
+            return response.Response(status=status.HTTP_403_FORBIDDEN)
+        return super().get(request, args, kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_celebrity():
+            return response.Response(status=status.HTTP_403_FORBIDDEN)
+        return super().post(request, args, kwargs)

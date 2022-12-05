@@ -101,6 +101,12 @@ class User(AbstractUser):
             return "".join(["+213", username[5:]])
         return username
 
+    def is_client(self):
+        return hasattr(self, 'client')
+
+    def is_celebrity(self):
+        return hasattr(self, 'celebrity')
+
     def __str__(self):
         return f"{self.phone_number}"
 
@@ -115,7 +121,7 @@ class Availability(models.Model):
         return f"{self.start_day}-{self.end_day}"
 
     class Meta:
-        verbose_name_plural = "Disponibilities"
+        verbose_name_plural = "Availabilities"
 
 
 class Celebrity(models.Model):
@@ -174,7 +180,7 @@ class OfferRequest(models.Model):
 
 
 def get_report_image_location(instance, filename):
-    return f"/reports/{instance.reporter.user.username}/%y-%m-%d/{filename}"
+    return f"reports/{instance.reporter.username}/%y-%m-%d/{filename}"
 
 
 class Report(models.Model):
@@ -182,6 +188,6 @@ class Report(models.Model):
                                        related_name="report_sender")
     reported: User = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
                                        related_name="report_recipient")
-    report_date = models.PositiveBigIntegerField(default=0)
+    report_date = models.CharField(default="", max_length=60)
     report_reason = models.TextField(default="Report Reason")
     report_image = models.ImageField(upload_to=get_report_image_location)
