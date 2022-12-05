@@ -26,6 +26,6 @@ class ImageMessageInfo(models.Model):
     image = models.ImageField(upload_to=get_media_chat_upload_path)
 
 
-class VoiceMessageInfo(ChatMessageInfo):
-    message_info = models.OneToOneField(ChatMessageInfo, related_name="voidemessage", on_delete=models.CASCADE)
+class VoiceMessageInfo(models.Model):
+    message_info = models.OneToOneField(ChatMessageInfo, on_delete=models.CASCADE)
     audio = models.FileField(upload_to=get_media_chat_upload_path)
