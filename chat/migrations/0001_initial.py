@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='VoiceMessageInfo',
+            name='VoiceMessage',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('audio', models.FileField(upload_to=chat.models.get_media_chat_upload_path)),
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='TextMessageInfo',
+            name='TextMessage',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('text_message', models.CharField(default='', max_length=300)),
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='ImageMessageInfo',
+            name='ImageMessage',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('image', models.ImageField(upload_to=chat.models.get_media_chat_upload_path)),
