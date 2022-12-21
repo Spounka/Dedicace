@@ -69,6 +69,23 @@ WILAYA_CHOICES = [
 
 
 # Create your models here.
+class PaymentInformation(models.Model):
+    ccp = models.CharField(default="0024242424/24", max_length=50, null=True, unique=True)
+    rip = models.CharField(default="0079999002453623936", max_length=255, null=True, unique=True)
+    address = models.CharField(max_length=255)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name="ccp_or_rip_not_null",
+                check=(
+                        models.Q(ccp__isnull=True, rip__isnull=False) |
+                        models.Q(ccp__isnull=False, rip__isnull=True)
+                )
+            )
+        ]
+
+
 class User(AbstractUser):
     username_validator = UnicodeUsernameValidator()
     username = models.CharField(
