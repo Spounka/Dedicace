@@ -68,7 +68,10 @@ ROOT_URLCONF = 'dedicace.urls'
 TEMPLATES = [
     {
         'BACKEND':  'django.template.backends.django.DjangoTemplates',
-        'DIRS':     [],
+        'DIRS':     [
+            BASE_DIR / 'templates',
+            BASE_DIR / 'dashboard/templates'
+        ],
         'APP_DIRS': True,
         'OPTIONS':  {
             'context_processors': [
