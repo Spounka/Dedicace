@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        {% block Title %}
+
+        {% endblock %}
+    </title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.9.0/semantic.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.9.0/semantic.min.js"></script>
+    {% block styling %}{% endblock %}
+</head>
+<body>
+<div class="ui two column grid">
+    <div class="three wide column">
+        {% include 'dashboard/views/side_bar.html' %}
+    </div>
+    <div class="thirteen wide column">
+        {% block body %}
+        {% endblock %}
+    </div>
+</div>
+{% block scripts %}
+{% endblock %}
+</body>
+</html>

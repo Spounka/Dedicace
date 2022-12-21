@@ -1,0 +1,62 @@
+{% extends 'dashboard/base/base.html' %}
+{% block Title %}
+    Create New Celebrity
+{% endblock %}
+
+{% block body %}
+    <div class="ui basic segment">
+        <h3 class="ui huge header" style="margin-bottom: 95px">Create Celebrity</h3>
+        <form class="ui form" style="margin-top: 0; padding-right: 1%" method="post">
+            {% csrf_token %}
+            <div class="ui equal width grid">
+                <div class="row">
+                    <div class="column">
+                        <h2 class="ui header" style="margin-top: 0; padding-bottom: 22px">
+                            Personal Information
+                        </h2>
+                        <div class="field">
+                            <input type="tel" name="phone-number" placeholder="Phone Number">
+                        </div>
+                        <div class="field">
+                            <input type="text" name="name" placeholder="Name">
+                        </div>
+                        <div class="field">
+                            <input type="text" name="last-name" placeholder="Last Name">
+                        </div>
+                        <div class="field">
+                            <input type="email" name="email" placeholder="Email">
+                        </div>
+                        <div class="field">
+                            <input type="text" name="username" placeholder="Username">
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="ui fluid card" style="padding: 16px 20px">
+                            <h2 class="ui header" style="margin-top: 0; padding-bottom: 22px">
+                                CCP / Payment Information
+                            </h2>
+                            <div class="field">
+                                <input type="text" name="ccp" placeholder="CCP">
+                            </div>
+                            <div class="field">
+                                <input type="text" name="rip" placeholder="RIP">
+                            </div>
+                            <div class="field">
+                                <textarea rows="5" name="address" placeholder="Address"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="right aligned column" style="margin-top: 120px">
+                        <button class="ui big basic red secondary button">
+                            discard
+                        </button>
+                        <input type="submit" class="ui big green button" value="Send"/>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    {#    {{ form }}#}
+{% endblock %}

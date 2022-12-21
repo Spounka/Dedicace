@@ -1,0 +1,56 @@
+{% load i18n %}
+<style>
+    span.ui.inverted.medium.text {
+        font-size: 1.3em;
+    }
+
+    a.item {
+        padding-left: 10% !important;
+        margin-bottom: 0 !important;
+    }
+
+    .celeb-active.item {
+        background-color: #3793F0 !important;
+    }
+
+    .payment-active.item {
+        background-color: #3793F0 !important;
+    }
+
+    .users-active.item {
+        background-color: #3793F0 !important;
+    }
+
+    .reports-active.item {
+        background-color: #3793F0 !important;
+    }
+</style>
+<div style="position:fixed;height: 100vh;background-color: #1c4e80; padding-top: 12px;
+             overflow-x: hidden; -ms-overflow-x: hidden">
+    <h3 class="ui centered inverted big header" style="margin-bottom: 90px; margin-top: 0">
+        Dedicace
+    </h3>
+    <div class="ui wide secondary inverted fluid vertical menu"
+         style="width: auto !important;">
+        <a href="{% url 'dashboard-create-celeb' %}" class="{{ celeb_active }} fluid item">
+                <span class="ui inverted medium text">
+                    {% translate 'Create a new Celebrity' %}
+                </span>
+        </a>
+        <a href="{% url 'dashboard-view-payments' %}" class="{{ payment_active }}item">
+                <span class="ui inverted medium text">
+                    {% translate 'Payments' %}
+                </span>
+        </a>
+        <a href="{% url 'dashboard-view-users' %}" class="{{ users_active }}item">
+                <span class="ui inverted medium text">
+                    {% translate 'Users' %}
+                </span>
+        </a>
+        <a href="{% url 'dashboard-view-reports' %}" class="{{ reports_active }}item">
+                <span class="ui inverted medium text">
+                    {% translate 'Reports' %}
+                </span>
+        </a>
+    </div>
+</div>
