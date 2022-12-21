@@ -4,7 +4,6 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from .manager import UserManager
-from rest_framework.parsers import MultiPartParser
 
 WILAYA_CHOICES = [
     ("01", _("Adrar")),
