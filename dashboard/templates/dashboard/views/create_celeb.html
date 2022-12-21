@@ -60,3 +60,8 @@
     </div>
     {#    {{ form }}#}
 {% endblock %}
+
+{% block scripts %}
+    {% load static %}
+    <script src="{% static 'dashboard/js/create_celeb.js' %}"></script>
+{% endblock %}
