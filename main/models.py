@@ -103,7 +103,7 @@ class User(AbstractUser):
     )
 
     phone_number = models.CharField(default="+213", max_length=20, unique=True)
-    ccp = models.CharField(default="0024242424/24", max_length=50)
+    payment_details = models.OneToOneField(PaymentInformation, on_delete=models.SET_NULL, null=True, blank=True)
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "phone_number"
