@@ -145,7 +145,7 @@ class Celebrity(models.Model):
     price = models.FloatField(default=0.0)
     is_available = models.BooleanField(default=True, null=False, blank=False)
     user: User = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    availability: Availability = models.OneToOneField(Availability, on_delete=models.SET_NULL, null=True)
+    availability: Availability = models.OneToOneField(Availability, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"Celeb - {self.user.phone_number}"
