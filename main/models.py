@@ -69,8 +69,8 @@ WILAYA_CHOICES = [
 
 # Create your models here.
 class PaymentInformation(models.Model):
-    ccp = models.CharField(default="0024242424/24", max_length=50, null=True, unique=True)
-    rip = models.CharField(default="0079999002453623936", max_length=255, null=True, unique=True)
+    ccp = models.CharField(default="0024242424/24", max_length=50, null=True)
+    rip = models.CharField(default="0079999002453623936", max_length=255, null=True)
     address = models.CharField(max_length=255)
 
     def __str__(self):
