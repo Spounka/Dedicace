@@ -60,6 +60,7 @@ REST_FRAMEWORK = {
 
 AUTHENTICATION_BACKENDS = [
     'main.auth.UserAuthBackend',
+    'main.auth.UserAuthUsernameIsPhone',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
