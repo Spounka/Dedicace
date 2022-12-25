@@ -1,0 +1,42 @@
+.celeb-active.item {
+    background-color: #3793F0 !important;
+}
+
+.payment-active.item {
+    background-color: #3793F0 !important;
+}
+
+.users-active.item {
+    background-color: #3793F0 !important;
+}
+
+.reports-active.item {
+    background-color: #3793F0 !important;
+}
+
+#sidebar-container {
+    position: fixed;
+    height: 100vh;
+    background-color: #1c4e80;
+    padding-top: 12px;
+    overflow-x: hidden;
+    -ms-overflow-x: hidden;
+}
+
+#sidebar-header {
+    margin-bottom: 90px;
+    margin-top: 0;
+}
+
+#sidebar-menu {
+    width: auto !important;
+}
+
+.sidebar-item {
+    font-size: 1.4em !important;
+}
+
+.sidebar-link {
+    padding-left: 10% !important;
+    margin-bottom: 0 !important;
+}

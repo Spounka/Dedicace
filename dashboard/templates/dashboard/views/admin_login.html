@@ -1,0 +1,53 @@
+{% extends 'dashboard/base/base.html' %}
+{% load i18n %}
+
+{% block Title %}
+    Dashboard | Login
+{% endblock Title %}
+
+{% block main %}
+    <div class="ui container" style="padding-top: 120px">
+        <div class="ui very compact container segment" style="max-width: 30vw">
+            <form class="ui form" method="post" action="{% url 'dashboard-login' %}">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <h1 class="ui centered header" style="margin-bottom: 130px">
+                    Login
+                </h1>
+                {% for error in form.authenticator.errors %}
+                    <div class="ui error message">
+                        <div class="header">
+                            {% translate "Authenticator error" %}
+                        </div>
+                        <p> {{ error | escape }} </p>
+                    </div>
+                {% endfor %}
+                <div class="field">
+                    {{ form.authenticator }}
+                </div>
+                {% for error in form.password.errors %}
+                    <div class="ui error message">
+                        <div class="header">
+                            {% translate "Password error" %}
+                        </div>
+                        <p> {{ error | escape }} </p>
+                    </div>
+                {% endfor %}
+                <div class="field">
+                    {{ form.password }}
+                </div>
+                <div class="inline field">
+                    <div class="ui left aligned checkbox">
+                        <input type="checkbox" tabindex="0" class="hidden">
+                        <label>Remember Me</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <button class="ui fluid big green button">
+                        Login
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock main %}

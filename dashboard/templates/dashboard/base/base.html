@@ -14,15 +14,17 @@
     {% block styling %}{% endblock %}
 </head>
 <body>
-<div class="ui two column grid">
-    <div class="three wide column">
-        {% include 'dashboard/views/side_bar.html' %}
+{% block main %}
+    <div class="ui two column grid">
+        <div class="three wide column">
+            {% include 'dashboard/views/side_bar.html' %}
+        </div>
+        <div class="thirteen wide column">
+            {% block body %}
+            {% endblock %}
+        </div>
     </div>
-    <div class="thirteen wide column">
-        {% block body %}
-        {% endblock %}
-    </div>
-</div>
+{% endblock %}
 {% block scripts %}
 {% endblock %}
 </body>

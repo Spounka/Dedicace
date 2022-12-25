@@ -1,8 +1,8 @@
-from django.urls import path, include
-from django.views.generic import TemplateView
+from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('login/', views.AdminLogin.as_view(), name="dashboard-login"),
     path('celebs/create/', views.CreateCelebrityAPIView.as_view(), name='dashboard-create-celeb'),
     path('payments/', views.CreateCelebrityAPIView.as_view(), name='dashboard-view-payments'),
     path('users/', views.CreateCelebrityAPIView.as_view(), name='dashboard-view-users'),
