@@ -18,9 +18,11 @@ RUN set -ex && \
 
 COPY . /code/
 
+RUN --mount=type=secret,id=SECRET_KEY \
+    SECRET_KEY="$(cat /run/secrets/SECRET_KEY)" \
 RUN --mount=type=secret,id=DATABASE_URL \
-    DATABASE_URL="$(cat /run/secrets/DATABASE_URL)"\
-    python manage.py collectstatic --noinput
+    DATABASE_URL="$(cat /run/secrets/DATABASE_URL)",\
+    python manage.py collectstatic --noinput \
 
 EXPOSE 8000
 
