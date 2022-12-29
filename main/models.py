@@ -1,3 +1,5 @@
+import datetime
+
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
@@ -118,6 +120,10 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.phone_number}"
 
+    @property
+    def full_name(self):
+        return self.get_full_name()
+
 
 class Availability(models.Model):
     start_day = models.CharField(default="Sunday", max_length=10)
@@ -159,13 +165,24 @@ def get_user_receipt_upload_folder(instance, filename):
 
 
 class Payment(models.Model):
+    STATUS_CHOICES = [
+        ('pending', _("Pending")),
+        ('confirmed', _("Confirmed")),
+        ('refused', _("Refused")),
+        ('updated', _("Updated")),
+    ]
     amount_paid = models.FloatField(default=0.0)
     payment_date = models.PositiveIntegerField(default=0)
     is_valid = models.BooleanField(default=False)
     receipt = models.ImageField(upload_to=get_user_receipt_upload_folder)
+    payment_status = models.CharField(choices=STATUS_CHOICES, default='pending', max_length=10)
 
     def __str__(self):
         return f"Payment#{self.id}"
+
+    @property
+    def get_date_from_long(self):
+        return datetime.datetime.fromtimestamp(self.payment_date / 1000.0)
 
 
 class OfferRequest(models.Model):

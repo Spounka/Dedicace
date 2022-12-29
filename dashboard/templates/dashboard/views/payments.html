@@ -1,0 +1,286 @@
+{% extends 'dashboard/base/base.html' %}
+{% load i18n %}
+{% load static %}
+{% block Title %}
+    Payments
+{% endblock %}
+{% block styling %}
+    <style>
+        .status-button {
+            pointer-events: none;
+            color: white !important;
+            width: 100px;
+        }
+
+        .pending {
+            background-color: #F7931A !important;
+        }
+
+        .confirmed {
+            background-color: #30C89A !important;
+        }
+
+        .refused {
+            background-color: #E74C3C !important;
+        }
+
+        .updated {
+            background-color: #3793F0 !important;
+        }
+
+        .payment-object {
+            cursor: pointer;
+        }
+
+
+        div.ui.clearing.fitted.segment {
+            padding-top: 5px;
+            padding-right: 5px;
+            padding-bottom: 5px;
+            border: none;
+        }
+
+        div.ui.clearing.fitted.segment > img {
+            width: 24px;
+        }
+
+    </style>
+{% endblock %}
+
+{% block pageTitle %}
+    Payments
+{% endblock %}
+
+{% block body %}
+    {{ block.super }}
+    {#    Filters #}
+    <div class="ui four column grid" style="margin-right: 1rem">
+        {# All#}
+        <div class="column">
+            <a href="javascript:clearQueries()" class="ui segment container">
+                <div class="ui two column grid">
+                    <div class="row">
+                        <div class="middle aligned column">
+                            <h3 class="ui header">All</h3>
+                        </div>
+                        <div class="right aligned column">
+                            <div class="ui clearing fitted segment" style="background-color: #B0B8C0">
+                                <img src="{% static 'dashboard/img/svg/people.svg' %}" alt="people svg image"
+                                     class="ui right floated mini image">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="two wide column">
+                            <h3 class="ui header">
+                                {{ all_payments }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {# Confirmed #}
+        <div class="column">
+            <a href="javascript:setSearchQuery('filter', 'confirmed')" class="ui segment container">
+                <div class="ui two column grid">
+                    <div class="row">
+                        <div class="middle aligned column">
+                            <h3 class="ui header">Confirmed</h3>
+                        </div>
+                        <div class="right aligned column">
+                            <div class="ui clearing fitted segment" style="background-color: #30C89A">
+                                <img src="{% static 'dashboard/img/svg/checkmark.svg' %}" alt="checkmark svg image"
+                                     class="ui right floated mini image">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="two wide column">
+                            <h3 class="ui header">
+                                {{ confirmed_payments }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {# Pending #}
+        <div class="column">
+            <a href="javascript:setSearchQuery('filter', 'pending')" class="ui segment container">
+                <div class="ui two column grid">
+                    <div class="row">
+                        <div class="middle aligned column">
+                            <h3 class="ui header">Pending</h3>
+                        </div>
+                        <div class="right aligned column">
+                            <div class="ui clearing fitted segment" style="background-color: #F7931A">
+                                <img src="{% static 'dashboard/img/svg/pending.svg' %}" alt="pending svg image"
+                                     class="ui right floated mini image">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="two wide column">
+                            <h3 class="ui header">
+                                {{ pending_payments }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {# Refused #}
+        <div class="column">
+            <a href="javascript:setSearchQuery('filter', 'refused')" class="ui segment container">
+                <div class="ui two column grid">
+                    <div class="row">
+                        <div class="middle aligned column">
+                            <h3 class="ui header">Refused</h3>
+                        </div>
+                        <div class="right aligned column">
+                            <div class="ui clearing fitted segment" style="background-color: #E74C3C">
+                                <img src="{% static 'dashboard/img/svg/x.svg' %}" alt="x svg image"
+                                     class="ui right floated mini image">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="two wide column">
+                            <h3 class="ui header">
+                                {{ refused_payments }}
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    {#    Display List #}
+    <div class="ui very relaxed list">
+        {#    Search Bar #}
+        <div class="item">
+            <div class="ui search" style="margin-right: 28px">
+                <div class="ui fluid left icon input">
+                    <input id="searchbar-input" type="text" class="prompt" value="{{ search_value }}"
+                           placeholder={% translate 'Search...' %} style="border-radius:.28571429rem"/>
+                    <i class="search icon"></i>
+                </div>
+            </div>
+        </div>
+
+        {#    Objects#}
+        {% for object in page_obj %}
+            <div class="item payment-object"
+                 data-sender="{{ object.offerrequest.sender.full_name }}"
+                 data-recepient="{{ object.offerrequest.recepient.full_name }}"
+                 data-amount="{{ object.amount_paid }}"
+                 data-img="{{ object.receipt }}">
+                <div class="content">
+                    <div class="ui grid" style="border-bottom: lightgrey solid thin; margin-right: 28px;">
+                        <div class="middle aligned column">
+                            <img src="{% static 'dashboard/img/img.png' %}" alt="avatar image"
+                                 class="ui avatar image">
+                        </div>
+                        <div class="two wide middle aligned column">
+                            {{ object.offerrequest.sender.username }}
+                        </div>
+                        <div class="two wide middle aligned column">
+                            {{ object.offerrequest.recepient.username }}
+                        </div>
+                        <div class="two wide middle aligned column">
+                            {{ object.amount_paid }} Dzd
+                        </div>
+                        <div class="three wide middle aligned column">
+                            {{ object.get_date_from_long }}
+                        </div>
+                        <div class="two wide middle aligned right floated column">
+                            <button readonly="true" class="ui button {{ object.payment_status }} status-button">
+                                {{ object.payment_status | capfirst }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!--    Pagination Menu -->
+    <div class="ui right floated basic segment" style="padding-right: 1rem; margin-right: 1rem">
+        <div class="ui secondary centered pagination menu" style="max-width: 200px">
+            {% if page_obj.has_previous %}
+                <a href="javascript:setSearchQuery('page', {{ page_obj.previous_page_number }})"
+                   class="item">previous</a>
+            {% endif %}
+            <a href="javascript:void(0)" class="active item">{{ page_obj.number }}</a>
+            {% if page_obj.has_next %}
+                <a href="javascript:setSearchQuery('page', {{ page_obj.next_page_number }})"
+                   class="item">next</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="ui modal" id="receipt-modal">
+        <div class="content">
+            <div class="ui basic segment container">
+                <div class="ui grid">
+                    <div class="row">
+                        <div class="column">
+                            From:
+                        </div>
+                        <div class="four wide middle aligned column">
+                            <span class="ui text" id="from">
+                                Spounka
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="column">
+                            To:
+                        </div>
+                        <div class="four wide middle aligned column">
+                            <span class="ui text" id="to">
+                                ZedK
+                            </span>
+                        </div>
+                        <div class="four wide right aligned right floated middle aligned column">
+                            <span class="ui text" id="amount">
+                                25,000 Dzd
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <form class="ui fluid form" action="/dashboard/download/" id="download-file-form" method="POST">
+                {% csrf_token %}
+                <div class="ui grid segment container"
+                     style="background-color: #E8ECEF; border: none;  cursor: pointer" id="download-img">
+                    <div class="middle aligned column">
+                        <img src="{% static 'dashboard/img/svg/image.svg' %}" alt="image svg" class="ui mini image">
+                    </div>
+                    <div class="four wide middle aligned column">
+                    <span class="ui medium text">
+                        {% translate 'Payment receipt' %}
+                    </span>
+                    </div>
+                    <div class="middle aligned right floated four wide column">
+                        <img src="{% static 'dashboard/img/svg/download.svg' %}" alt="Download svg"
+                             class="ui right floated mini image">
+                    </div>
+                    <input id="file-path-input" name="file-path" type="text" value="" hidden>
+                    <input type="submit" hidden>
+                </div>
+            </form>
+        </div>
+        <div class="center aligned actions">
+            <button class="ui green button" onclick="$('#receipt-modal').modal('hide');">
+                {% translate 'Accept' %}
+            </button>
+        </div>
+    </div>
+
+{% endblock body %}
+{% block scripts %}
+    <script src="{% static 'dashboard/js/payments.js' %}"></script>
+{% endblock %}

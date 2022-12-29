@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,17 +16,63 @@
 </head>
 <body>
 {% block main %}
-    <div class="ui two column grid">
+    <div class="ui two columns grid">
         <div class="three wide column">
             {% include 'dashboard/views/side_bar.html' %}
         </div>
         <div class="thirteen wide column">
             {% block body %}
+                <div class="ui three column relaxed grid"
+                     style="margin-right: 1rem; margin-top: 1rem">
+                    <div class="eight wide column">
+                        <h1 class="ui header">
+                            {% block pageTitle %}
+                            {% endblock %}
+                        </h1>
+                    </div>
+                    <div class="four wide column">
+                        {% if updated_payments > 0 %}
+                            <a href="javascript:setSearchQuery('filter', 'updated')" class="ui container segment"
+                               style="background-color: #3793F0; color:white;text-decoration: none">
+                                <div class="ui grid">
+                                    <div class="eight wide middle aligned column">
+                                        <h4 class="ui inverted header">
+                                            Updated
+                                        </h4>
+                                    </div>
+                                    <div class="right floated two wide column">
+                                        <span style="text-decoration: none"> {{ updated_payments }} </span>
+                                    </div>
+                                    <div class="right floated middle aligned four wide column">
+                                        <img src="{% static 'dashboard/img/svg/update.svg' %}" alt="updated state svg"
+                                             class="ui tiny right floated image"
+                                             style="max-height: 20px; max-width: 20px">
+                                    </div>
+                                </div>
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="four wide right aligned column">
+                        <div class="ui horizontal list">
+                            <div class="item">
+                                <img src="{% static 'dashboard/img/img.png' %}"
+                                     alt="" class="ui right floated avatar image">
+                                <div class="left aligned content">
+                                    <div class="header">
+                                        {{ user.username }}
+                                    </div>
+                                    <i>{{ user.email }}</i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             {% endblock %}
         </div>
     </div>
 {% endblock %}
 {% block scripts %}
+    <script src="{% static 'dashboard/js/payments.js' %}"></script>
 {% endblock %}
 </body>
 </html>

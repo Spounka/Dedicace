@@ -3,17 +3,17 @@
 {% block Title %}
     Create New Celebrity
 {% endblock Title %}
+{% block pageTitle %}
+    Create Celebrity
+{% endblock %}
 {% block body %}
-    <div class="ui basic segment">
-        <h3 class="ui huge header" style="margin-bottom: 95px">Create Celebrity</h3>
-        <form class="ui form error"
-              style="margin-top: 0;
-                     padding-right: 1%"
-              method="post">
+    {{ block.super }}
+    <div class="ui basic segment" style="margin-top: 5em">
+        <form class="ui form error" style="margin-top: 0; padding-right: 1%; padding-left: 0" method="post">
             {% csrf_token %}
             <div class="ui equal width grid">
                 <div class="row">
-                    <div class="column">
+                    <div class="column" style="padding-left: 0">
                         <h2 class="ui header" style="margin-top: 0; padding-bottom: 22px">Personal Information</h2>
                         {% for error in form.phone_number.errors %}
                             <div class="ui error message">

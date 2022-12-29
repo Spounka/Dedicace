@@ -1,10 +1,11 @@
-from django.urls import path
+from django.urls import path, re_path
 from . import views
 
 urlpatterns = [
     path('login/', views.AdminLogin.as_view(), name="dashboard-login"),
     path('celebs/create/', views.CreateCelebrityAPIView.as_view(), name='dashboard-create-celeb'),
-    path('payments/', views.CreateCelebrityAPIView.as_view(), name='dashboard-view-payments'),
+    path('payments/', views.PaymentsView.as_view(), name='dashboard-view-payments'),
     path('users/', views.CreateCelebrityAPIView.as_view(), name='dashboard-view-users'),
     path('reports/', views.CreateCelebrityAPIView.as_view(), name='dashboard-view-reports'),
+    path(r'download/', views.download_file, name='dashboard-download-file')
 ]

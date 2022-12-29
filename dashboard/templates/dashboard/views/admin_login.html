@@ -10,6 +10,14 @@
         <div class="ui very compact container segment" style="max-width: 30vw">
             <form class="ui form" method="post" action="{% url 'dashboard-login' %}">
                 {% csrf_token %}
+                {% if form.errors %}
+                    <div class="ui error message">
+                        <div class="header">
+                            {% translate "User error" %}
+                        </div>
+                        <p> Wrong username or password</p>
+                    </div>
+                {% endif %}
                 {{ form.non_field_errors }}
                 <h1 class="ui centered header" style="margin-bottom: 130px">
                     Login
