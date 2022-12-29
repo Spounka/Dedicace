@@ -1,0 +1,1 @@
+postgres://postgres:cfPqoXAeNS8zwAa@dedicace-db.internal:5433/dedicace
