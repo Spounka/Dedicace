@@ -1,8 +1,9 @@
 from knox.auth import TokenAuthentication
-from rest_framework import generics, mixins, response, status, parsers
+from rest_framework import generics, response, status, parsers
 from rest_framework.permissions import IsAuthenticated
-from . import models, serializers
+
 from main import models as m
+from . import models, serializers
 
 
 # Create your views here.
