@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import datetime
 import os
 from pathlib import Path
 
@@ -58,6 +59,11 @@ REST_FRAMEWORK = {
     )
 }
 
+REST_KNOX = {
+    'AUTO_REFRESH': True,
+    'TOKEN_TTL':    datetime.timedelta(days=90)
+}
+
 AUTHENTICATION_BACKENDS = [
     'main.auth.UserAuthBackend',
     'main.auth.UserAuthUsernameIsPhone',
@@ -85,6 +91,28 @@ TEMPLATES = [
     },
 ]
 
+LOGGING = {
+    'version':                  1,
+    'disable_existing_loggers': False,
+    'handlers':                 {
+        'stream': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
+        },
+        'file':   {
+            'level':    'INFO',
+            'class':    'logging.FileHandler',
+            'filename': 'chat.log'
+        }
+    },
+    'loggers': {
+        'chat': {
+            'level':    'INFO',
+            'handlers': ['stream', 'file']
+        }
+    }
+}
+
 WSGI_APPLICATION = 'dedicace.wsgi.application'
 
 # Database
@@ -93,14 +121,10 @@ WSGI_APPLICATION = 'dedicace.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE':   'django.db.backends.postgresql',
-        # 'NAME':     os.environ.get("POSTGRES_DB"),
-        # 'USER':     os.environ.get("POSTGRES_USER"),
-        # 'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
-        # 'HOST':     "db",
-        'NAME':     "Dedicace",
-        'USER':     "spounka",
-        'PASSWORD': "pass123",
-        'HOST':     "localhost",
+        'NAME':     os.environ.get("POSTGRES_DB", 'Dedicace'),
+        'USER':     os.environ.get("POSTGRES_USER", 'spounka'),
+        'PASSWORD': os.environ.get("POSTGRES_PASSWORD", 'pass123'),
+        'HOST':     os.environ.get("POSTGRES_HOST", 'localhost'),
         'PORT':     5432,
     }
 }
