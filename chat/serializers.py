@@ -1,5 +1,11 @@
 from rest_framework import serializers
+
+from main.serializers import UserSerializer
 from . import models
+
+
+class DiscussionSerializer(serializers.ModelsSerializer):
+    parties = UserSerializer(many=True)
 
 
 class MessageInfoSerializer(serializers.ModelSerializer):
