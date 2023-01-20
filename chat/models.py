@@ -3,6 +3,10 @@ from django.db import models
 
 
 # Create your models here.
+class Discussion(models.Model):
+    parties = models.ManyToManyField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+
 class ChatMessageInfo(models.Model):
     date_sent = models.CharField(max_length=60, default="")
     sender: settings.AUTH_USER_MODEL = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="sent_messages",
