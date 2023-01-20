@@ -8,11 +8,12 @@ class Discussion(models.Model):
 
 
 class ChatMessageInfo(models.Model):
-    date_sent = models.CharField(max_length=60, default="")
     sender: settings.AUTH_USER_MODEL = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="sent_messages",
                                                          on_delete=models.SET_NULL, null=True)
     recepient: settings.AUTH_USER_MODEL = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="received_messages",
                                                             on_delete=models.SET_NULL, null=True)
+    date_sent = models.CharField(max_length=60, default="")
+    discussion = models.ForeignKey(Discussion, on_delete=models.CASCADE)
 
 
 class TextMessage(models.Model):
