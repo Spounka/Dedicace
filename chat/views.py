@@ -50,7 +50,8 @@ class TextMessageAPIView(generics.ListCreateAPIView):
         recepient = m.Client.objects.filter(pk=kwargs.get('pk')).first()
         if not recepient:
             return response.Response(status=status.HTTP_400_BAD_REQUEST)
-        message_info = models.ChatMessageInfo(sender=request.user, recepient=recepient.user)
+        message_info = models.ChatMessageInfo(
+            sender=request.user, recepient=recepient.user)
         message_info.date_sent = request.data['date_sent']
         message_info.save()
         serializer.validated_data['message_info'] = message_info
@@ -66,9 +67,11 @@ class ImageMessageAPIView(generics.ListCreateAPIView):
 
     def list(self, request, *args, **kwargs):
         if request.user.is_celebrity():
-            messages = models.ImageMessage.objects.filter(message_info__sender=request.user)
+            messages = models.ImageMessage.objects.filter(
+                message_info__sender=request.user)
         elif request.user.is_client():
-            messages = models.ImageMessage.objects.filter(message_info__recepient=request.user)
+            messages = models.ImageMessage.objects.filter(
+                message_info__recepient=request.user)
         else:
             return response.Response(status=status.HTTP_403_FORBIDDEN)
         return response.Response(data=serializers.ImageMessageSerializer(messages, many=True).data,
@@ -82,7 +85,8 @@ class ImageMessageAPIView(generics.ListCreateAPIView):
         recepient = m.Client.objects.filter(pk=kwargs.get('pk')).first()
         if not recepient:
             return response.Response(status=status.HTTP_400_BAD_REQUEST)
-        message_info = models.ChatMessageInfo(sender=request.user, recepient=recepient.user)
+        message_info = models.ChatMessageInfo(
+            sender=request.user, recepient=recepient.user)
         message_info.date_sent = request.data['date_sent']
         message_info.save()
         serializer.validated_data['message_info'] = message_info
@@ -98,9 +102,11 @@ class VoiceMessageAPIView(generics.ListCreateAPIView):
 
     def list(self, request, *args, **kwargs):
         if request.user.is_celebrity():
-            messages = models.VoiceMessage.objects.filter(message_info__sender=request.user)
+            messages = models.VoiceMessage.objects.filter(
+                message_info__sender=request.user)
         elif request.user.is_client():
-            messages = models.VoiceMessage.objects.filter(message_info__recepient=request.user)
+            messages = models.VoiceMessage.objects.filter(
+                message_info__recepient=request.user)
         else:
             return response.Response(status=status.HTTP_403_FORBIDDEN)
         return response.Response(data=serializers.VoiceMessageSerializer(messages, many=True).data,
@@ -114,7 +120,8 @@ class VoiceMessageAPIView(generics.ListCreateAPIView):
         recepient = m.Client.objects.filter(pk=kwargs.get('pk')).first()
         if not recepient:
             return response.Response(status=status.HTTP_400_BAD_REQUEST)
-        message_info = models.ChatMessageInfo(sender=request.user, recepient=recepient.user)
+        message_info = models.ChatMessageInfo(
+            sender=request.user, recepient=recepient.user)
         message_info.date_sent = request.data['date_sent']
         message_info.save()
         serializer.validated_data['message_info'] = message_info
