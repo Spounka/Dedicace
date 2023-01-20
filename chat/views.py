@@ -7,6 +7,22 @@ from . import models, serializers
 
 
 # Create your views here.
+class DiscussionAPIView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
+    serializer_class = serializers.MessageInfoSerializer
+
+    def list(self, request, *args, **kwargs):
+        try:
+            user = m.Client.objects.get(pk=kwargs.get('pk')).user
+        except m.Client.DoesNotExist:
+            user = m.Celebrity.objects.get(pk=kwargs.get('pk')).user
+        messages = models.ChatMessageInfo.objects.filter(
+            models.Q(sender=user) | models.Q(recepient=user))
+        return response.Response(data=serializers.TextMessageSerializer(messages, many=True).data,
+                                 status=status.HTTP_200_OK)
+
+
 class TextMessageAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = (TokenAuthentication,)
