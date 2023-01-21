@@ -52,3 +52,28 @@ class MessageInfoSerializer(serializers.ModelSerializer):
         model = models.ChatMessageInfo
         fields = ['id', 'sender', 'recepient', 'date_sent', 'textmessage', 'voicemessage', 'imagemessage', 'discussion']
         depth = 2
+
+    def create(self, validated_data: dict[str, Any]):
+        sender = UserModel.objects.get(pk=validated_data.get('sender').pk)
+        recepient = UserModel.objects.get(pk=validated_data.get('recepient').pk)
+        logger.info(f'details: {sender=} {recepient=}')
+        discussion = models.Discussion.objects \
+            .filter(members__exact=sender.pk) \
+            .filter(members__exact=recepient.pk).first()
+        if not discussion:
+            logger.error(f'no discussion found for users with pk {sender.pk} and {recepient.pk}')
+            discussion = models.Discussion.objects.create()
+            discussion.members.add(sender)
+            discussion.members.add(recepient)
+        if (textmessage := validated_data.pop('textmessage', None)) is not None:
+            message_info = models.ChatMessageInfo.objects.create(discussion=discussion, **validated_data)
+            models.TextMessage.objects.create(message_info=message_info, **textmessage)
+        elif (imagemessage := validated_data.get('imagemessage', None)) is not None:
+            message_info = models.ChatMessageInfo.objects.create(discussion=discussion, **validated_data)
+            models.imageMessage.objects.create(message_info=message_info, **imagemessage)
+        elif (voicemessage := validated_data.get('voicemessage', None)) is not None:
+            message_info = models.ChatMessageInfo.objects.create(discussion=discussion, **validated_data)
+            models.voiceMessage.objects.create(message_info=message_info, **voicemessage)
+        else:
+            raise serializers.ValidationError('Need to pass voice_message or text_message or image_message')
+        return message_info
