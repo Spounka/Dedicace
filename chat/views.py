@@ -13,14 +13,10 @@ class DiscussionAPIView(generics.ListAPIView):
     serializer_class = serializers.MessageInfoSerializer
 
     def list(self, request, *args, **kwargs):
-        try:
-            user = m.Client.objects.get(pk=kwargs.get('pk')).user
-        except m.Client.DoesNotExist:
-            user = m.Celebrity.objects.get(pk=kwargs.get('pk')).user
-        messages = models.ChatMessageInfo.objects.filter(
-            models.Q(sender=user) | models.Q(recepient=user))
-        return response.Response(data=serializers.TextMessageSerializer(messages, many=True).data,
-                                 status=status.HTTP_200_OK)
+        user: settings.AUTH_USER_MODEL = request.user
+        discussions = models.Discussion.objects.filter(members__pk=user.pk)
+        data = serializers.DiscussionSerializer(discussions, many=True)
+        return response.Response(status=status.HTTP_200_OK, data=data.data)
 
 
 class TextMessageAPIView(generics.ListCreateAPIView):
