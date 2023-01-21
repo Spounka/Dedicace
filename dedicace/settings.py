@@ -105,10 +105,10 @@ LOGGING = {
             'filename': 'chat.log'
         }
     },
-    'loggers':                  {
-        '': {
-            'level':    'DEBUG',
-            'handlers': ['stream']
+    'loggers': {
+        'chat': {
+            'level':    'INFO',
+            'handlers': ['stream', 'file']
         }
     }
 }
