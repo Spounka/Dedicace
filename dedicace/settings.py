@@ -98,6 +98,11 @@ LOGGING = {
         'stream': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
+        },
+        'file':   {
+            'level':    'INFO',
+            'class':    'logging.FileHandler',
+            'filename': 'chat.log'
         }
     },
     'loggers':                  {
