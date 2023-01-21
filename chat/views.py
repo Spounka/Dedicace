@@ -24,7 +24,6 @@ class DiscussionAPIView(generics.ListAPIView):
             try:
                 discussion = models.Discussion.objects.get(pk=pk)
                 messages = discussion.chatmessageinfo_set.all()
-                message: models.ChatMessageInfo = messages.first()
                 result = serializers.MessageInfoSerializer(messages, many=True)
                 logger.info(f'found discussion with id {discussion.pk}')
                 return response.Response(status=status.HTTP_200_OK, data=result.data)
