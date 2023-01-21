@@ -13,12 +13,10 @@ logger.setLevel(logging.DEBUG)
 
 
 class DiscussionSerializer(serializers.ModelSerializer):
-    members = UserSerializer(many=True)
-
     class Meta:
         model = models.Discussion
         fields = "__all__"
-        depth = 2
+        depth = 1
 
 
 class TextMessageSerializer(serializers.ModelSerializer):
