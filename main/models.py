@@ -203,7 +203,7 @@ class OfferRequest(models.Model):
     title = models.CharField(max_length=100, default="Title")
 
     def __str__(self):
-        return f"{self.sender.username}-{self.recepient}"
+        return f"{self.title} {self.sender.phone_number}"
 
 
 def get_report_image_location(instance, filename):
