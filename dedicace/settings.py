@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import datetime
 import os
 from pathlib import Path
 
@@ -56,6 +57,11 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     )
+}
+
+REST_KNOX = {
+    'AUTO_REFRESH': True,
+    'TOKEN_TTL':    datetime.timedelta(days=90)
 }
 
 AUTHENTICATION_BACKENDS = [
