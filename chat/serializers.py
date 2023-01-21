@@ -1,7 +1,15 @@
+import logging
+from typing import Any
+
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from main.serializers import UserSerializer
 from . import models
+
+UserModel = get_user_model()
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class DiscussionSerializer(serializers.ModelSerializer):
