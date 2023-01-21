@@ -32,3 +32,13 @@ class VoiceMessageSerializer(serializers.ModelSerializer):
         model = models.VoiceMessage
         fields = "__all__"
         depth = 1
+
+
+class MessageInfoSerializer(serializers.ModelSerializer):
+    sender = serializers.PrimaryKeyRelatedField(read_only=True)
+    recepient = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = models.ChatMessageInfo
+        fields = ['id', 'sender', 'recepient', 'date_sent', 'textmessage', 'voicemessage', 'imagemessage']
+        depth = 2
