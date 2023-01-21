@@ -1,9 +1,15 @@
+import logging
+
+from django.conf import settings
 from knox.auth import TokenAuthentication
 from rest_framework import generics, response, status, parsers
 from rest_framework.permissions import IsAuthenticated
 
 from main import models as m
 from . import models, serializers
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 # Create your views here.
