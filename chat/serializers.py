@@ -4,14 +4,13 @@ from main.serializers import UserSerializer
 from . import models
 
 
-class DiscussionSerializer(serializers.ModelsSerializer):
-    parties = UserSerializer(many=True)
+class DiscussionSerializer(serializers.ModelSerializer):
+    members = UserSerializer(many=True)
 
-
-class MessageInfoSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.ChatMessageInfo
+        model = models.Discussion
         fields = "__all__"
+        depth = 2
 
 
 class TextMessageSerializer(serializers.ModelSerializer):
