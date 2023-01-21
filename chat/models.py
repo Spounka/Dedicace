@@ -4,7 +4,10 @@ from django.db import models
 
 # Create your models here.
 class Discussion(models.Model):
-    parties = models.ManyToManyField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL)
+
+    def __str__(self):
+        return f'{self.members.first().phone_number}/{self.members.last().phone_number}'
 
 
 class ChatMessageInfo(models.Model):
