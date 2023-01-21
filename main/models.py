@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
 from .manager import UserManager
 
 WILAYA_CHOICES = [
@@ -199,9 +200,10 @@ class OfferRequest(models.Model):
     recepient: User = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                                         related_name="request_recepient")
     description = models.TextField()
+    title = models.CharField(max_length=100, default="Title")
 
     def __str__(self):
-        return f"{self.sender.username}-{self.recepient}"
+        return f"{self.title} {self.sender.phone_number}"
 
 
 def get_report_image_location(instance, filename):
