@@ -41,10 +41,14 @@ class VoiceMessageSerializer(serializers.ModelSerializer):
 
 
 class MessageInfoSerializer(serializers.ModelSerializer):
-    sender = serializers.PrimaryKeyRelatedField(read_only=True)
-    recepient = serializers.PrimaryKeyRelatedField(read_only=True)
+    sender = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.filter())
+    recepient = serializers.PrimaryKeyRelatedField(queryset=UserModel.objects.filter())
+    textmessage = TextMessageSerializer(required=False)
+    voicemessage = VoiceMessageSerializer(required=False)
+    imagemessage = ImageMessageSerializer(required=False)
+    discussion = DiscussionSerializer(required=False)
 
     class Meta:
         model = models.ChatMessageInfo
-        fields = ['id', 'sender', 'recepient', 'date_sent', 'textmessage', 'voicemessage', 'imagemessage']
+        fields = ['id', 'sender', 'recepient', 'date_sent', 'textmessage', 'voicemessage', 'imagemessage', 'discussion']
         depth = 2
