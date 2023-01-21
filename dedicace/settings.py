@@ -85,6 +85,23 @@ TEMPLATES = [
     },
 ]
 
+LOGGING = {
+    'version':                  1,
+    'disable_existing_loggers': False,
+    'handlers':                 {
+        'stream': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
+        }
+    },
+    'loggers':                  {
+        '': {
+            'level':    'DEBUG',
+            'handlers': ['stream']
+        }
+    }
+}
+
 WSGI_APPLICATION = 'dedicace.wsgi.application'
 
 # Database
