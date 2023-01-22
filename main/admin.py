@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+
 from .models import User, Celebrity, Client, Availability, OfferRequest, Payment, PaymentInformation
 
 
@@ -9,6 +10,12 @@ class CustomUserAdmin(UserAdmin):
          {
              "classes": ("wide",),
              "fields":  ("phone_number", "username", "password1", "password2"),
+         }),
+    )
+    fieldsets = (
+        (None,
+         {
+             "fields": ("phone_number", "username", "password", "payment_details"),
          }),
     )
     list_display = ("phone_number", "username", "email", "first_name", "last_name", "is_staff")
