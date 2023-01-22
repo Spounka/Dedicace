@@ -16,7 +16,7 @@ class DiscussionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Discussion
         fields = "__all__"
-        depth = 1
+        depth = 0
 
 
 class TextMessageSerializer(serializers.ModelSerializer):
@@ -70,10 +70,10 @@ class MessageInfoSerializer(serializers.ModelSerializer):
             models.TextMessage.objects.create(message_info=message_info, **textmessage)
         elif (imagemessage := validated_data.get('imagemessage', None)) is not None:
             message_info = models.ChatMessageInfo.objects.create(discussion=discussion, **validated_data)
-            models.imageMessage.objects.create(message_info=message_info, **imagemessage)
+            models.ImageMessage.objects.create(message_info=message_info, **imagemessage)
         elif (voicemessage := validated_data.get('voicemessage', None)) is not None:
             message_info = models.ChatMessageInfo.objects.create(discussion=discussion, **validated_data)
-            models.voiceMessage.objects.create(message_info=message_info, **voicemessage)
+            models.VoiceMessage.objects.create(message_info=message_info, **voicemessage)
         else:
             raise serializers.ValidationError('Need to pass voice_message or text_message or image_message')
         return message_info
