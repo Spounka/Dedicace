@@ -48,12 +48,6 @@ class MessageInfoAPIView(generics.ListCreateAPIView):
     serializer_class = serializers.MessageInfoSerializer
     queryset = models.ChatMessageInfo.objects.get
 
-    def get(self, request, *args, **kwargs):
-        rec = UserModel.objects.get(pk=request.GET["pk"])
-        logger.info(
-            f'discussions: {models.Discussion.objects.filter(members__exact=request.user.pk).filter(members__exact=rec.pk)}')
-        return response.Response(status=status.HTTP_200_OK)
-
     def create(self, request: WSGIRequest, *args, **kwargs):
         request.data['sender'] = request.user.pk
         return super().create(request, *args, **kwargs)
