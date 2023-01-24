@@ -26,7 +26,7 @@ class DiscussionAPIView(generics.ListAPIView):
         if (pk := kwargs.get('pk')) is not None:
             try:
                 discussion = models.Discussion.objects.get(pk=pk)
-                messages = discussion.chatmessageinfo_set.all()
+                messages = discussion.messages.all()
                 result = serializers.MessageInfoSerializer(messages, many=True)
                 logger.info(f'found discussion with id {discussion.pk}')
                 return response.Response(status=status.HTTP_200_OK, data=result.data)
