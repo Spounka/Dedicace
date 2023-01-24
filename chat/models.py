@@ -16,7 +16,8 @@ class ChatMessageInfo(models.Model):
     recepient: settings.AUTH_USER_MODEL = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="received_messages",
                                                             on_delete=models.SET_NULL, null=True)
     date_sent = models.CharField(max_length=60, default="")
-    discussion = models.ForeignKey(Discussion, on_delete=models.CASCADE, default=None, null=True)
+    discussion = models.ForeignKey(Discussion, related_name="messages", on_delete=models.CASCADE, default=None,
+                                   null=True)
 
 
 class TextMessage(models.Model):
