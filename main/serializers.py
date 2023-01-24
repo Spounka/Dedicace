@@ -1,3 +1,5 @@
+from typing import Any
+
 from rest_framework import serializers
 
 from .models import User, Celebrity, Client, OfferRequest, Payment, Report
