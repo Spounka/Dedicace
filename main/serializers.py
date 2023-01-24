@@ -9,7 +9,18 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["id", "first_name", "last_name", "email", "phone_number", "username", "payment_details"]
 
 
-class ClientSerializer(serializers.ModelSerializer):
+class GenereicUserModelsSerializer(serializers.ModelSerializer):
+    def create(self, validated_data: dict[str, Any]):
+        user_data = validated_data.pop('user')
+        password: str = user_data.pop('password')
+        user_data['phone_number'] = User.normalize_username(user_data['phone_number'])
+        user: User = User.objects.create(**user_data)
+        user.set_password(password)
+        client = Client.objects.create(user=user, **validated_data)
+        return client
+
+
+class ClientSerializer(GenereicUserModelsSerializer):
     class Meta:
         model = Client
         fields = "__all__"
@@ -29,7 +40,7 @@ class AvailabilitySerializer(serializers.ModelSerializer):
         depth = 2
 
 
-class CelebritySerializer(serializers.ModelSerializer):
+class CelebritySerializer(GenereicUserModelsSerializer):
     class Meta:
         model = Celebrity
         fields = "__all__"
