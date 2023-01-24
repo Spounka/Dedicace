@@ -4,6 +4,16 @@ from django.contrib.auth.admin import UserAdmin
 from .models import User, Celebrity, Client, Availability, OfferRequest, Payment, PaymentInformation
 
 
+class ClientInline(admin.StackedInline):
+    model = Client
+    extra = 0
+
+
+class CelebrityInline(admin.StackedInline):
+    model = Celebrity
+    extra = 0
+
+
 class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None,
@@ -13,13 +23,20 @@ class CustomUserAdmin(UserAdmin):
          }),
     )
     fieldsets = (
-        (None,
+        ('Personal Info',
          {
              "fields": ("phone_number", "username", "password", "payment_details"),
          }),
+        ('Misc Details', {
+            "fields": ('first_name', 'last_name'),
+        }),
     )
     list_display = ("phone_number", "username", "email", "first_name", "last_name", "is_staff")
     ordering = ("phone_number", "username")
+    inlines = [
+        ClientInline,
+        CelebrityInline,
+    ]
 
 
 admin.site.register(User, CustomUserAdmin)
