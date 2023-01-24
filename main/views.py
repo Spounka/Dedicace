@@ -1,9 +1,13 @@
-from django.db.models import ImageField
-from knox.auth import TokenAuthentication
-from rest_framework import generics, mixins, response, status
-from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import user_logged_in, login
 from django.contrib.auth.hashers import make_password
-from rest_framework.parsers import MultiPartParser, FormParser
+from knox.auth import TokenAuthentication
+from knox.models import AuthToken
+from knox.settings import knox_settings
+from rest_framework import generics, mixins, response, status
+from rest_framework.fields import DateTimeField
+from rest_framework.parsers import MultiPartParser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.serializers import ModelSerializer
 
 from .models import User, Celebrity, Client, OfferRequest, Payment, Report
 from .serializers import (
@@ -24,21 +28,39 @@ class ViewCurrentModel(generics.RetrieveAPIView):
         return response.Response(status.HTTP_403_FORBIDDEN)
 
 
+def get_expiry_datetime_format():
+    return knox_settings.EXPIRY_DATETIME_FORMAT
+
+
+def format_expiry_datetime(expiry):
+    datetime_format = get_expiry_datetime_format()
+    return DateTimeField(format=datetime_format).to_representation(expiry)
+
+
+def get_ttl():
+    return knox_settings.TOKEN_TTL
+
+
 class UserCreateAPIView(generics.CreateAPIView):
     serializer_class = ClientSerializer
     model = None
-    args_to_add = {}
 
     def create(self, request, *args, **kwargs):
-        phone_number = User.normalize_username(request.data.get('phone_number'))
-        user: User = User.objects.create(phone_number=phone_number, email=request.data.get('email'),
-                                         ccp=request.data.get('ccp'))
-        user.set_password(request.data.get('password'))
-        obj = self.model.objects.create(user=user, **self.args_to_add)
-        obj.save()
+        serializer: ModelSerializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        client: Client = serializer.save()
+        user = client.user
+        ttl = get_ttl()
+        login(request, user, backend='main.auth.UserAuthUsernameIsPhone')
+        instance, token = AuthToken.objects.create(user, ttl)
+        user_logged_in.send(sender=request.user.__class__,
+                            request=request, user=request.user)
+        data = {
+            'expiry': format_expiry_datetime(instance.expiry),
+            'token':  token
+        }
 
-        serializer = self.get_serializer(obj)
-        return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+        return response.Response(data=data, status=status.HTTP_201_CREATED)
 
 
 class WithUserSupportAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -100,11 +122,7 @@ class ClientCurrent(ViewCurrentModel):
 
 class ClientCreate(UserCreateAPIView):
     serializer_class = ClientSerializer
-    model = User
-
-    def create(self, request, *args, **kwargs):
-        self.args_to_add['wilaya'] = request.data.get('wilaya', '01')
-        return super().create(request, args, kwargs)
+    model = Client
 
 
 class ClientReadUpdateDestroyAPIView(WithUserSupportAPIView):
