@@ -8,10 +8,18 @@ from .models import User, Celebrity, Client, OfferRequest, Payment, Report
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
+        fields = ["id", "first_name", "last_name", "email", "phone_number", "username", "payment_details", 'password']
+
+
+class ReturnUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
         fields = ["id", "first_name", "last_name", "email", "phone_number", "username", "payment_details"]
 
 
 class GenereicUserModelsSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
     def create(self, validated_data: dict[str, Any]):
         user_data = validated_data.pop('user')
         password: str = user_data.pop('password')
@@ -20,6 +28,9 @@ class GenereicUserModelsSerializer(serializers.ModelSerializer):
         user.set_password(password)
         client = Client.objects.create(user=user, **validated_data)
         return client
+
+    def update(self, instance, validated_data):
+        pass
 
 
 class ClientSerializer(GenereicUserModelsSerializer):

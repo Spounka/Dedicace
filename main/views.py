@@ -24,7 +24,7 @@ class ViewCurrentModel(generics.RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         obj = self.model.objects.filter(user_id=request.user.id).first()
         if obj:
-            return response.Response(self.serializer_class(obj).data)
+            return response.Response(self.serializer_class(obj).data, status.HTTP_200_OK)
         return response.Response(status.HTTP_403_FORBIDDEN)
 
 
