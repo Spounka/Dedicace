@@ -147,12 +147,6 @@ class CelebrityCreate(UserCreateAPIView):
     serializer_class = CelebritySerializer
     model = Celebrity
 
-    def create(self, request, *args, **kwargs):
-        self.args_to_add['price'] = request.data.get('price', '00')
-        self.args_to_add['is_available'] = request.data.get('is_available', True)
-        self.args_to_add['availability'] = request.data.get('availability', None)
-        return super().create(request, args, kwargs)
-
 
 class CelebrityReadUpdateAPIView(WithUserSupportAPIView):
     serializer_class = CelebritySerializer
