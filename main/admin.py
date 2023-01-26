@@ -31,7 +31,7 @@ class CustomUserAdmin(UserAdmin):
             "fields": ('first_name', 'last_name'),
         }),
         ('Admin Stuff', {
-            'fields': ('is_staff', 'is_admin', 'is_active', 'date_joined', 'groups', 'user_permissions')
+            'fields': ('is_staff', 'is_superuser', 'is_active', 'date_joined', 'groups', 'user_permissions')
         })
     )
     list_display = ("phone_number", "username", "email", "first_name", "last_name", "is_staff")
