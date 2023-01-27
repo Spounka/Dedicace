@@ -1,7 +1,9 @@
-from django.urls import path, re_path
+from django.urls import path
+
 from . import views
 
 urlpatterns = [
+    path('', views.index, name='dashboard-index'),
     path('login/', views.AdminLogin.as_view(), name="dashboard-login"),
     path('celebs/create/', views.CreateCelebrityAPIView.as_view(), name='dashboard-create-celeb'),
     path('payments/', views.PaymentsView.as_view(), name='dashboard-view-payments'),

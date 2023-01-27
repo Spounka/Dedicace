@@ -1,4 +1,3 @@
-import datetime
 import mimetypes
 import os
 
@@ -6,16 +5,23 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.handlers.wsgi import WSGIRequest
+from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseForbidden
+from django.shortcuts import reverse
 from django.urls import reverse_lazy
 from django.views import generic
-from django.shortcuts import reverse
-from django.db.models import Q
-from . import forms
+
 from main import models
+from . import forms
 
 
 # Create your views here.
+def index(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        return HttpResponseRedirect(reverse('dashboard-create-celeb'))
+    return HttpResponseRedirect(reverse('dashboard-login'))
+
+
 class CreateCelebrityAPIView(LoginRequiredMixin, generic.FormView):
     template_name = 'dashboard/views/create_celeb.html'
     login_url = reverse_lazy('dashboard-login')
