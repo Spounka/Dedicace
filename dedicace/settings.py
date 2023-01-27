@@ -20,12 +20,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&_*hcuw7w45=i4-5=%((h2efryk8_^(eqzb*q-2x2*_5%_i*tt'
+SECRET_KEY = '&)df!la*9g7d+ul-qlrlq@$!gmrf(wk0#*7@^(k&r#pi5t+#bb'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["localhost", 'dedicace.cc', 'dedicace.fly.dev']
+
+CSRF_TRUSTED_ORIGINS = [
+    'localhost',
+    'dedicace.fly.dev',
+    'dedicace.cc'
+]
 
 # Application definition
 
@@ -105,7 +111,7 @@ LOGGING = {
             'filename': 'chat.log'
         }
     },
-    'loggers': {
+    'loggers':                  {
         'chat': {
             'level':    'INFO',
             'handlers': ['stream', 'file']
