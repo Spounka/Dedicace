@@ -12,7 +12,7 @@ def create_dummy_user(i: int, offset: int = 0):
     password = "rootuser"
     email = f"admin{i + offset + 1}@admin.com"
     username = f"username{i + offset + 1}"
-    user = User.objects.create_user(phone_number=phone_number, email=email, password=password, username=username)
+    user = User.objects.create_client(phone_number=phone_number, email=email, password=password, username=username)
     user.save()
     return user
 

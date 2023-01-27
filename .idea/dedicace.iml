@@ -24,6 +24,10 @@
     <orderEntry type="library" name="jquery" level="application" />
     <orderEntry type="library" name="fomantic-ui" level="application" />
   </component>
+  <component name="PackageRequirementsSettings">
+    <option name="removeUnused" value="true" />
+    <option name="modifyBaseFiles" value="true" />
+  </component>
   <component name="PyDocumentationSettings">
     <option name="format" value="PLAIN" />
     <option name="myDocStringFormat" value="Plain" />

@@ -77,7 +77,9 @@ class PaymentInformation(models.Model):
     address = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.user.username} PaymentInformation"
+        if hasattr(self, 'user'):
+            return f"{self.user.username} PaymentInformation"
+        return f"{self.ccp}"
 
 
 class User(AbstractUser):

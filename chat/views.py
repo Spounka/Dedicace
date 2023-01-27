@@ -26,7 +26,7 @@ class DiscussionAPIView(generics.ListAPIView):
         if (pk := kwargs.get('pk')) is not None:
             try:
                 discussion = models.Discussion.objects.get(pk=pk)
-                messages = discussion.chatmessageinfo_set.all()
+                messages = discussion.messages.all()
                 result = serializers.MessageInfoSerializer(messages, many=True)
                 logger.info(f'found discussion with id {discussion.pk}')
                 return response.Response(status=status.HTTP_200_OK, data=result.data)
@@ -47,12 +47,6 @@ class MessageInfoAPIView(generics.ListCreateAPIView):
     authentication_classes = (TokenAuthentication,)
     serializer_class = serializers.MessageInfoSerializer
     queryset = models.ChatMessageInfo.objects.get
-
-    def get(self, request, *args, **kwargs):
-        rec = UserModel.objects.get(pk=request.GET["pk"])
-        logger.info(
-            f'discussions: {models.Discussion.objects.filter(members__exact=request.user.pk).filter(members__exact=rec.pk)}')
-        return response.Response(status=status.HTTP_200_OK)
 
     def create(self, request: WSGIRequest, *args, **kwargs):
         request.data['sender'] = request.user.pk
