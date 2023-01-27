@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.reverse import reverse_lazy
@@ -134,3 +135,36 @@ class TestCreateClient(APITestCase):
         response = self.client.post(reverse_lazy('client-create'), data={}, format='json')
         # assert
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class TestUserUpdate(TestCase):
+    def test_user_updates_successfully(self):
+        user = User.objects.create_user(username='test', phone_number='0669344917', email='something@something.com',
+                                        password='rootuser')
+        client = Client.objects.create(user=user, wilaya=34)
+
+        data = {
+            'user':   {
+                'phone_number': '0669344917',
+                'username':     'test2',
+                'password':     'rootusers',
+                'first_name':   'dela3a',
+                'last_name':    'betteikha'
+            },
+            'wilaya': '25'
+        }
+
+        factory = APIRequestFactory()
+        request = factory.put(reverse('client-rud', kwargs={'pk': client.pk}), data=data, format='json')
+        force_authenticate(request, user)
+        view = views.ClientReadUpdateDestroyAPIView.as_view()
+        response = view(request, pk=client.pk)
+
+        client = Client.objects.get(pk=client.pk)
+
+        self.assertEqual(response.data.get('user').get('username'), data.get('user').get('username'))
+        self.assertEqual(response.data.get('user').get('first_name'), data.get('user').get('first_name'))
+        self.assertEqual(response.data.get('wilaya'), data.get('wilaya'))
+
+        self.assertEqual(client.user.username, data.get('user').get('username'))
+        self.assertEqual(client.wilaya, data.get('wilaya'))
