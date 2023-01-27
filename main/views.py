@@ -1,5 +1,4 @@
 from django.contrib.auth import user_logged_in, login
-from django.contrib.auth.hashers import make_password
 from knox.auth import TokenAuthentication
 from knox.models import AuthToken
 from knox.settings import knox_settings
@@ -9,9 +8,9 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import ModelSerializer
 
-from .models import User, Celebrity, Client, OfferRequest, Payment, Report
+from .models import Celebrity, Client, OfferRequest, Payment, Report
 from .serializers import (
-    UserSerializer, CelebritySerializer, ClientSerializer, OfferRequestSerializer,
+    CelebritySerializer, ClientSerializer, OfferRequestSerializer,
     PaymentSerializer, AvailabilitySerializer, ReportSerializer
 )
 
@@ -71,30 +70,6 @@ class WithUserSupportAPIView(generics.RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs):
         if not self.is_editing_self(request, args, kwargs):
             return response.Response(status=status.HTTP_403_FORBIDDEN)
-
-        # makes sure we don't accidentally change user's id
-        request.data.pop('id', None)
-
-        user_data: dict[str, str] = request.data.pop('user', None)
-        user: User = self.get_object().user
-        if user_data:
-            # if we changed the password, we have to hash it, so we don't store it raw
-            if user_data.get('password', None):
-                user_data['password'] = make_password(user_data['password'])
-            if user_data.get('phone_number', None):
-                user_data['phone_number'] = User.normalize_username(user_data['phone_number'])
-
-            # remove fields that may cause vulnerabilities
-            user_data.pop('id', None)
-            user_data.pop('is_superuser', None)
-            user_data.pop('is_staff', None)
-            user_data.pop('is_active', None)
-            user_data.pop('groups', None)
-            user_data.pop('user_permissions', None)
-
-            user_serializer = UserSerializer(instance=user, data=user_data, partial=True)
-            user_serializer.is_valid(raise_exception=True)
-            user_serializer.save()
         return super().update(request, args, kwargs)
 
     def delete(self, request, *args, **kwargs):
