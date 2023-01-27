@@ -1,13 +1,16 @@
-from django.db.models import ImageField
+from django.contrib.auth import user_logged_in, login
 from knox.auth import TokenAuthentication
+from knox.models import AuthToken
+from knox.settings import knox_settings
 from rest_framework import generics, mixins, response, status
+from rest_framework.fields import DateTimeField
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth.hashers import make_password
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.serializers import ModelSerializer
 
-from .models import User, Celebrity, Client, OfferRequest, Payment, Report
+from .models import Celebrity, Client, OfferRequest, Payment, Report
 from .serializers import (
-    UserSerializer, CelebritySerializer, ClientSerializer, OfferRequestSerializer,
+    CelebritySerializer, ClientSerializer, OfferRequestSerializer,
     PaymentSerializer, AvailabilitySerializer, ReportSerializer
 )
 
@@ -20,25 +23,43 @@ class ViewCurrentModel(generics.RetrieveAPIView):
     def retrieve(self, request, *args, **kwargs):
         obj = self.model.objects.filter(user_id=request.user.id).first()
         if obj:
-            return response.Response(self.serializer_class(obj).data)
+            return response.Response(self.serializer_class(obj).data, status.HTTP_200_OK)
         return response.Response(status.HTTP_403_FORBIDDEN)
+
+
+def get_expiry_datetime_format():
+    return knox_settings.EXPIRY_DATETIME_FORMAT
+
+
+def format_expiry_datetime(expiry):
+    datetime_format = get_expiry_datetime_format()
+    return DateTimeField(format=datetime_format).to_representation(expiry)
+
+
+def get_ttl():
+    return knox_settings.TOKEN_TTL
 
 
 class UserCreateAPIView(generics.CreateAPIView):
     serializer_class = ClientSerializer
     model = None
-    args_to_add = {}
 
     def create(self, request, *args, **kwargs):
-        phone_number = User.normalize_username(request.data.get('phone_number'))
-        user: User = User.objects.create(phone_number=phone_number, email=request.data.get('email'),
-                                         ccp=request.data.get('ccp'))
-        user.set_password(request.data.get('password'))
-        obj = self.model.objects.create(user=user, **self.args_to_add)
-        obj.save()
+        serializer: ModelSerializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        client: Client = serializer.save()
+        user = client.user
+        ttl = get_ttl()
+        login(request, user, backend='main.auth.UserAuthUsernameIsPhone')
+        instance, token = AuthToken.objects.create(user, ttl)
+        user_logged_in.send(sender=request.user.__class__,
+                            request=request, user=request.user)
+        data = {
+            'expiry': format_expiry_datetime(instance.expiry),
+            'token':  token
+        }
 
-        serializer = self.get_serializer(obj)
-        return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+        return response.Response(data=data, status=status.HTTP_201_CREATED)
 
 
 class WithUserSupportAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -49,30 +70,6 @@ class WithUserSupportAPIView(generics.RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs):
         if not self.is_editing_self(request, args, kwargs):
             return response.Response(status=status.HTTP_403_FORBIDDEN)
-
-        # makes sure we don't accidentally change user's id
-        request.data.pop('id', None)
-
-        user_data: dict[str, str] = request.data.pop('user', None)
-        user: User = self.get_object().user
-        if user_data:
-            # if we changed the password, we have to hash it, so we don't store it raw
-            if user_data.get('password', None):
-                user_data['password'] = make_password(user_data['password'])
-            if user_data.get('phone_number', None):
-                user_data['phone_number'] = User.normalize_username(user_data['phone_number'])
-
-            # remove fields that may cause vulnerabilities
-            user_data.pop('id', None)
-            user_data.pop('is_superuser', None)
-            user_data.pop('is_staff', None)
-            user_data.pop('is_active', None)
-            user_data.pop('groups', None)
-            user_data.pop('user_permissions', None)
-
-            user_serializer = UserSerializer(instance=user, data=user_data, partial=True)
-            user_serializer.is_valid(raise_exception=True)
-            user_serializer.save()
         return super().update(request, args, kwargs)
 
     def delete(self, request, *args, **kwargs):
@@ -100,11 +97,7 @@ class ClientCurrent(ViewCurrentModel):
 
 class ClientCreate(UserCreateAPIView):
     serializer_class = ClientSerializer
-    model = User
-
-    def create(self, request, *args, **kwargs):
-        self.args_to_add['wilaya'] = request.data.get('wilaya', '01')
-        return super().create(request, args, kwargs)
+    model = Client
 
 
 class ClientReadUpdateDestroyAPIView(WithUserSupportAPIView):
@@ -128,12 +121,6 @@ class CelebrityList(generics.ListAPIView):
 class CelebrityCreate(UserCreateAPIView):
     serializer_class = CelebritySerializer
     model = Celebrity
-
-    def create(self, request, *args, **kwargs):
-        self.args_to_add['price'] = request.data.get('price', '00')
-        self.args_to_add['is_available'] = request.data.get('is_available', True)
-        self.args_to_add['availability'] = request.data.get('availability', None)
-        return super().create(request, args, kwargs)
 
 
 class CelebrityReadUpdateAPIView(WithUserSupportAPIView):
