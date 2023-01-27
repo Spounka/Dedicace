@@ -29,8 +29,19 @@ class GenereicUserModelsSerializer(serializers.ModelSerializer):
         client = Client.objects.create(user=user, **validated_data)
         return client
 
-    def update(self, instance, validated_data):
-        pass
+    def update(self, instance: Client | Celebrity, validated_data: dict[str, Any]):
+        user_data = validated_data.pop('user')
+        user = instance.user
+        user.username = user_data.get('username', user.username)
+        user.first_name = user_data.get('first_name', user.first_name)
+        user.last_name = user_data.get('last_name', user.last_name)
+        user.email = user_data.get('email', user.email)
+        if (password := user_data.get('password', None)) is not None:
+            user.set_password(password)
+        user.save()
+        instance.wilaya = validated_data.get('wilaya', instance.wilaya)
+        instance.save()
+        return instance
 
 
 class ClientSerializer(GenereicUserModelsSerializer):
