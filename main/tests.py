@@ -168,3 +168,20 @@ class TestUserUpdate(TestCase):
 
         self.assertEqual(client.user.username, data.get('user').get('username'))
         self.assertEqual(client.wilaya, data.get('wilaya'))
+
+    def test_update_user_other_than_self_fails(self):
+        user = User.objects.create_user(username='test', phone_number='0669344917', email='something@something.com',
+                                        password='rootuser')
+        client = Client.objects.create(user=user, wilaya=14)
+        user2 = User.objects.create_user(username='test2', phone_number='0669344919', email='something@something.com',
+                                         password='rootuser')
+        factory = APIRequestFactory()
+        request = factory.put(reverse('client-rud', kwargs={'pk': client.pk}), data={'wilaya': 34}, format='json')
+        force_authenticate(request, user2)
+        view = views.ClientReadUpdateDestroyAPIView.as_view()
+        response = view(request, pk=client.pk)
+        old_wilaya = str(client.wilaya)
+        client = Client.objects.get(pk=client.pk)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(old_wilaya, client.wilaya)
