@@ -19,7 +19,7 @@
       <excludeFolder url="file://$MODULE_DIR$/conception" />
       <excludeFolder url="file://$MODULE_DIR$/data" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.10 (dedicace)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.11 (backend)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="jquery" level="application" />
     <orderEntry type="library" name="fomantic-ui" level="application" />
