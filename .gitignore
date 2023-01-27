@@ -137,3 +137,4 @@ requirements.txt.bak
 url_schem.json
 
 conception/
+staticfiles/
