@@ -27,7 +27,13 @@ class GetCurrentCelebFromPhone(generics.GenericAPIView):
         try:
             user = User.objects.get(phone_number=normalized_phone)
             celebrity = Celebrity.objects.get(user=user)
-            return response.Response(status=status.HTTP_200_OK, data=CelebritySerializer(celebrity).data)
+            ttl = get_ttl()
+            login(request, user, backend='main.auth.UserAuthUsernameIsPhone')
+            _, token = AuthToken.objects.create(user, ttl)
+            user_logged_in.send(sender=request.user.__class__,
+                                request=request, user=request.user)
+            return response.Response(status=status.HTTP_200_OK,
+                                     data={'token': token, **CelebritySerializer(celebrity).data})
         except (User.DoesNotExist, Celebrity.DoesNotExist):
             return response.Response(status=status.HTTP_404_NOT_FOUND,
                                      data={"message": "no celebrity with that phone number found"})

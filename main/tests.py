@@ -222,3 +222,18 @@ class TestCelebrity(APITestCase):
                                     format='json')
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_celeb_using_phone_token_is_valid(self):
+        user = User.objects.create_user(phone_number="0669344917", email="admin@admin.com", password="rootuser")
+        Celebrity.objects.create(user=user, price=0.0, description="")
+
+        response = self.client.post(path=reverse_lazy('celeb-from-phone'), data={"phone_number": user.phone_number},
+                                    format='json')
+
+        token = response.data.get('token')
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+        user_response: Response = client.get(reverse_lazy('celeb-current'))
+
+        self.assertEqual(user_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(user_response.data.get('user').get('phone_number'), User.normalize_username(user.phone_number))
