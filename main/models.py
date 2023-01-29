@@ -147,6 +147,7 @@ class Celebrity(models.Model):
     is_available = models.BooleanField(default=True, null=False, blank=False)
     user: User = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     availability: Availability = models.OneToOneField(Availability, on_delete=models.SET_NULL, null=True, blank=True)
+    is_new = models.BooleanField(default=True)
 
     def __str__(self):
         return f"Celeb - {self.user.phone_number}"
