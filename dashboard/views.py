@@ -2,30 +2,49 @@ import mimetypes
 import os
 
 from django.conf import settings
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import authenticate, login, get_user_model
+from django.contrib.auth.mixins import AccessMixin
 from django.core.handlers.wsgi import WSGIRequest
 from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseForbidden
 from django.shortcuts import reverse
 from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
 from main import models
 from . import forms
 
+User = get_user_model()
+
 
 # Create your views here.
+def is_admin_or_staff(user_obj: User):
+    if not user_obj.is_authenticated:
+        return False
+    return user_obj.is_staff or user_obj.is_superuser
+
+
 def index(request):
-    if request.user.is_authenticated and request.user.is_staff:
+    if is_admin_or_staff(request.user):
         return HttpResponseRedirect(reverse('dashboard-create-celeb'))
     return HttpResponseRedirect(reverse('dashboard-login'))
 
 
-class CreateCelebrityAPIView(LoginRequiredMixin, generic.FormView):
+class IsAdminOrStaffMixin(AccessMixin):
+    permission_denied_message = _("You do not have permission to view this")
+
+    def dispatch(self, request, *args, **kwargs):
+        if not is_admin_or_staff(request.user):
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+
+
+class CreateCelebrityAPIView(IsAdminOrStaffMixin, generic.FormView):
     template_name = 'dashboard/views/create_celeb.html'
     login_url = reverse_lazy('dashboard-login')
     form_class = forms.CreateCelebForm
+    success_url = reverse_lazy('dashboard-create-celeb')
 
     def get_success_url(self):
         return reverse('dashboard-create-celeb')
@@ -60,7 +79,6 @@ class CreateCelebrityAPIView(LoginRequiredMixin, generic.FormView):
 class AdminLogin(generic.FormView):
     form_class = forms.AdminLoginForm
     template_name = 'dashboard/views/admin_login.html'
-    success_url = reverse_lazy('dashboard-create-celeb')
     request = None
 
     def get(self, request, *args, **kwargs):
@@ -82,12 +100,13 @@ class AdminLogin(generic.FormView):
         return self.form_invalid(form)
 
 
-class PaymentsView(generic.ListView):
+class PaymentsView(IsAdminOrStaffMixin, generic.ListView):
     template_name = 'dashboard/views/payments.html'
-    # queryset = models.Payment.objects.all()
     model = models.Payment
     paginate_by = 5
     request: WSGIRequest = None
+    login_url = reverse_lazy('dashboard-login')
+    success_url = reverse_lazy('dashboard-view-payments')
 
     def get(self, request, *args, **kwargs):
         self.request = request
@@ -125,7 +144,8 @@ class PaymentsView(generic.ListView):
         return super().get_context_data(object_list=object_list, **kwargs)
 
 
-class UsersView(generic.ListView):
+class UsersView(IsAdminOrStaffMixin, generic.ListView):
+    login_url = reverse_lazy('dashboard-login')
     ...
 
 
