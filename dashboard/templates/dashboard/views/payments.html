@@ -252,7 +252,8 @@
                     </div>
                 </div>
             </div>
-            <form class="ui fluid form" action="/dashboard/download/" id="download-file-form" method="POST">
+            <form class="ui fluid form" action="{% url 'dashboard-download-file' %}" id="download-file-form"
+                  method="POST">
                 {% csrf_token %}
                 <div class="ui grid segment container"
                      style="background-color: #E8ECEF; border: none;  cursor: pointer" id="download-img">
