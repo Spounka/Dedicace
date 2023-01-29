@@ -1,4 +1,4 @@
-from django.contrib.auth import user_logged_in, login
+from django.contrib.auth import user_logged_in, login, get_user_model
 from knox.auth import TokenAuthentication
 from knox.models import AuthToken
 from knox.settings import knox_settings
@@ -13,6 +13,24 @@ from .serializers import (
     CelebritySerializer, ClientSerializer, OfferRequestSerializer,
     PaymentSerializer, AvailabilitySerializer, ReportSerializer
 )
+
+User = get_user_model()
+
+
+class GetCurrentCelebFromPhone(generics.GenericAPIView):
+    def post(self, request, *args, **kwargs):
+        phone_number = request.data.get('phone_number', None)
+        if not phone_number:
+            return response.Response(status=status.HTTP_400_BAD_REQUEST,
+                                     data={"message": "No phone number POSTed"})
+        normalized_phone = User.normalize_username(phone_number)
+        try:
+            user = User.objects.get(phone_number=normalized_phone)
+            celebrity = Celebrity.objects.get(user=user)
+            return response.Response(status=status.HTTP_200_OK, data=CelebritySerializer(celebrity).data)
+        except (User.DoesNotExist, Celebrity.DoesNotExist):
+            return response.Response(status=status.HTTP_404_NOT_FOUND,
+                                     data={"message": "no celebrity with that phone number found"})
 
 
 class ViewCurrentModel(generics.RetrieveAPIView):
