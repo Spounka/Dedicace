@@ -19,13 +19,13 @@ class CustomUserAdmin(UserAdmin):
         (None,
          {
              "classes": ("wide",),
-             "fields":  ("phone_number", "username", "password1", "password2"),
+             "fields":  ("phone_number", "username", "email", "password1", "password2"),
          }),
     )
     fieldsets = (
         ('Personal Info',
          {
-             "fields": ("phone_number", "username", "password", "payment_details"),
+             "fields": ("phone_number", "username", "email", "password", "payment_details"),
          }),
         ('Misc Details', {
             "fields": ('first_name', 'last_name'),
