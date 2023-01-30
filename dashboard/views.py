@@ -79,6 +79,7 @@ class CreateCelebrityAPIView(IsAdminOrStaffMixin, generic.FormView):
 class AdminLogin(generic.FormView):
     form_class = forms.AdminLoginForm
     template_name = 'dashboard/views/admin_login.html'
+    success_url = reverse_lazy('dashboard-create-celeb')
     request = None
 
     def get(self, request, *args, **kwargs):
