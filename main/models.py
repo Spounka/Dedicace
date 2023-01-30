@@ -169,17 +169,23 @@ def get_user_receipt_upload_folder(instance, filename):
 
 
 class Payment(models.Model):
+    PENDING = 'pending'
+    CONFIRMED = 'confirmed'
+    REFUSED = 'refused'
+    UPDATED = 'updated'
+
     STATUS_CHOICES = [
-        ('pending', _("Pending")),
-        ('confirmed', _("Confirmed")),
-        ('refused', _("Refused")),
-        ('updated', _("Updated")),
+        (PENDING, _("Pending")),
+        (CONFIRMED, _("Confirmed")),
+        (REFUSED, _("Refused")),
+        (UPDATED, _("Updated")),
     ]
+
     amount_paid = models.FloatField(default=0.0)
     payment_date = models.PositiveIntegerField(default=0)
     is_valid = models.BooleanField(default=False)
     receipt = models.ImageField(upload_to=get_user_receipt_upload_folder)
-    payment_status = models.CharField(choices=STATUS_CHOICES, default='pending', max_length=10)
+    payment_status = models.CharField(choices=STATUS_CHOICES, default=PENDING, max_length=10)
 
     def __str__(self):
         return f"Payment#{self.id}"
