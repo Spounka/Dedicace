@@ -108,6 +108,19 @@ class PaymentsView(IsAdminOrStaffMixin, generic.ListView):
     login_url = reverse_lazy('dashboard-login')
     success_url = reverse_lazy('dashboard-view-payments')
 
+    def post(self, request, *args, **kwargs):
+        value: str = request.POST.get('payment_status')
+        payment_id = request.POST.get('payment_id')
+        payment = models.Payment.objects.get(pk=int(payment_id))
+        if not payment.payment_status.lower() == payment.PENDING or payment.UPDATED:
+            return HttpResponseRedirect(self.success_url)
+        if value.lower() == 'accept':
+            payment.payment_status = payment.CONFIRMED
+        elif value.lower() == 'refuse':
+            payment.payment_status = payment.REFUSED
+        payment.save()
+        return HttpResponseRedirect(self.success_url)
+
     def get(self, request, *args, **kwargs):
         self.request = request
         return super().get(request, *args, **kwargs)
