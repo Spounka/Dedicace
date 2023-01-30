@@ -18,13 +18,10 @@ RUN set -ex && \
 
 COPY . /code/
 
-RUN --mount=type=secret,id=SECRET_KEY \
-    SECRET_KEY="$(cat /run/secrets/SECRET_KEY)" \
-RUN --mount=type=secret,id=DATABASE_URL \
-    DATABASE_URL="$(cat /run/secrets/DATABASE_URL)",\
-    python manage.py collectstatic --noinput \
+
+RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
 # replace demo.wsgi with <project_name>.wsgi
-CMD ["gunicorn", "--bind", ":8000", "--workers", "2", "dedicace.wsgi"]
+CMD ["gunicorn", "--bind", ":8000", "--workers", "3", "dedicace.wsgi"]
