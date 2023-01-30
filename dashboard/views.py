@@ -112,7 +112,7 @@ class PaymentsView(IsAdminOrStaffMixin, generic.ListView):
         value: str = request.POST.get('payment_status')
         payment_id = request.POST.get('payment_id')
         payment = models.Payment.objects.get(pk=int(payment_id))
-        if not payment.payment_status.lower() == payment.PENDING or payment.UPDATED:
+        if not payment.payment_status.lower() in [models.Payment.PENDING, models.Payment.UPDATED]:
             return HttpResponseRedirect(self.success_url)
         if value.lower() == 'accept':
             payment.payment_status = payment.CONFIRMED
