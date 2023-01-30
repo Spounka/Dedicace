@@ -176,7 +176,8 @@
                  data-sender="{{ object.offerrequest.sender.full_name }}"
                  data-recepient="{{ object.offerrequest.recepient.full_name }}"
                  data-amount="{{ object.amount_paid }}"
-                 data-img="{{ object.receipt }}">
+                 data-img="{{ object.receipt }}"
+                 data-id="{{ object.pk }}">
                 <div class="content">
                     <div class="ui grid" style="border-bottom: lightgrey solid thin; margin-right: 28px;">
                         <div class="middle aligned column">
@@ -275,9 +276,17 @@
             </form>
         </div>
         <div class="center aligned actions">
-            <button class="ui green button" onclick="$('#receipt-modal').modal('hide');">
-                {% translate 'Accept' %}
-            </button>
+            <form action="{% url 'dashboard-view-payments' %}" id="change-payment-status-form" method="post">
+                {% csrf_token %}
+                <button class="ui green button" onclick="acceptPayment()">
+                    {% translate 'Accept' %}
+                </button>
+                <button class="ui red button" onclick="refusePayment()">
+                    {% translate 'Refuse' %}
+                </button>
+                <input type="hidden" name="payment_id" id="payment-id">
+                <input type="hidden" name="payment_status" id="payment-status">
+            </form>
         </div>
     </div>
 
