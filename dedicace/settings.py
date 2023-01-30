@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "knox",
     'main',
-    'chat'
+    'chat',
+    'dashboard'
 ]
 
 MIDDLEWARE = [
@@ -105,7 +106,7 @@ LOGGING = {
             'filename': 'chat.log'
         }
     },
-    'loggers': {
+    'loggers':                  {
         'chat': {
             'level':    'INFO',
             'handlers': ['stream', 'file']
