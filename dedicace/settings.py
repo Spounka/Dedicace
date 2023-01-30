@@ -28,9 +28,10 @@ DEBUG = False
 ALLOWED_HOSTS = ["localhost", 'dedicace.cc', 'dedicace.fly.dev']
 
 CSRF_TRUSTED_ORIGINS = [
-    'localhost',
-    'dedicace.fly.dev',
-    'dedicace.cc'
+    'https://localhost',
+    'https://dedicace.fly.dev',
+    'http://dedicace.cc',
+    'https://dedicace.cc'
 ]
 
 # Application definition
