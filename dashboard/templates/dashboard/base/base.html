@@ -1,3 +1,4 @@
+{% load first_letters %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -55,8 +56,18 @@
                     <div class="four wide right aligned column">
                         <div class="ui horizontal list">
                             <div class="item">
-                                <img src="{% static 'dashboard/img/img.png' %}"
-                                     alt="" class="ui right floated avatar image">
+                                <div style="width: auto; position: relative; padding: 0"
+                                     class="ui right floated avatar image">
+                                    <img src="{% static 'dashboard/img/img.png' %}"
+                                         alt="" class="ui centered image">
+                                    <div class="ui inverted tiny center aligned sub header"
+                                         style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                                        margin:0; padding: 0; color: white">
+
+                                        {{ user.full_name | first_letters }}
+
+                                    </div>
+                                </div>
                                 <div class="left aligned content">
                                     <div class="header">
                                         {{ user.username }}

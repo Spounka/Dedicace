@@ -6,7 +6,7 @@ from rest_framework.reverse import reverse_lazy
 from rest_framework.test import APIRequestFactory, force_authenticate, APITestCase, APIClient
 
 from . import views
-from .models import User, Client
+from .models import User, Client, Celebrity
 
 
 def create_client() -> Client:
@@ -168,3 +168,72 @@ class TestUserUpdate(TestCase):
 
         self.assertEqual(client.user.username, data.get('user').get('username'))
         self.assertEqual(client.wilaya, data.get('wilaya'))
+
+    def test_update_user_other_than_self_fails(self):
+        user = User.objects.create_user(username='test', phone_number='0669344917', email='something@something.com',
+                                        password='rootuser')
+        client = Client.objects.create(user=user, wilaya=14)
+        user2 = User.objects.create_user(username='test2', phone_number='0669344919', email='something@something.com',
+                                         password='rootuser')
+        factory = APIRequestFactory()
+        request = factory.put(reverse('client-rud', kwargs={'pk': client.pk}), data={'wilaya': 34}, format='json')
+        force_authenticate(request, user2)
+        view = views.ClientReadUpdateDestroyAPIView.as_view()
+        response = view(request, pk=client.pk)
+        old_wilaya = str(client.wilaya)
+        client = Client.objects.get(pk=client.pk)
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(old_wilaya, client.wilaya)
+
+
+class TestCelebrity(APITestCase):
+    def test_get_celeb_using_phone_passes(self):
+        user = User.objects.create_user(phone_number="0669344917", email="admin@admin.com", password="rootuser")
+        Celebrity.objects.create(user=user, price=0.0, description="")
+
+        response = self.client.post(path=reverse_lazy('celeb-from-phone'), data={"phone_number": user.phone_number},
+                                    format='json')
+        normalized_phone = User.normalize_username(user.phone_number)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get('user').get('phone_number'), normalized_phone)
+
+    def test_get_celeb_using_no_phone_fails(self):
+        response = self.client.post(path=reverse_lazy('celeb-from-phone'), data={"phone_number": ""},
+                                    format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_celeb_using_bad_phone_fails(self):
+        user = User.objects.create_user(phone_number="0669344917", email="admin@admin.com", password="rootuser")
+        Celebrity.objects.create(user=user, price=0.0, description="")
+
+        response = self.client.post(path=reverse_lazy('celeb-from-phone'), data={"phone_number": "azerty"},
+                                    format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_celeb_using_wrong_phone_fails(self):
+        user = User.objects.create_user(phone_number="0669344917", email="admin@admin.com", password="rootuser")
+        Celebrity.objects.create(user=user, price=0.0, description="")
+
+        response = self.client.post(path=reverse_lazy('celeb-from-phone'), data={"phone_number": "0669344919"},
+                                    format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_celeb_using_phone_token_is_valid(self):
+        user = User.objects.create_user(phone_number="0669344917", email="admin@admin.com", password="rootuser")
+        Celebrity.objects.create(user=user, price=0.0, description="")
+
+        response = self.client.post(path=reverse_lazy('celeb-from-phone'), data={"phone_number": user.phone_number},
+                                    format='json')
+
+        token = response.data.get('token')
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+        user_response: Response = client.get(reverse_lazy('celeb-current'))
+
+        self.assertEqual(user_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(user_response.data.get('user').get('phone_number'), User.normalize_username(user.phone_number))

@@ -1,4 +1,5 @@
 from django.urls import path, include
+
 from . import views
 
 urlpatterns = [
@@ -16,6 +17,7 @@ urlpatterns = [
 
     # Celebrity Endpoints
     path(r'celebs/', views.CelebrityList.as_view(), name="celeb-current"),
+    path(r'celebs/from-phone/', views.GetCurrentCelebFromPhone.as_view(), name='celeb-from-phone'),
     path(r'celebs/current/', views.CelebrityCurrent.as_view(), name="celeb-current"),
     path(r'celebs/<int:pk>/', views.CelebrityReadUpdateAPIView.as_view(), name="celeb-ru"),
     path(r'celebs/offers/', views.RelatedOffersReadUpdate.as_view(), name="celeb-offers"),

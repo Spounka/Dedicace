@@ -1,4 +1,5 @@
 {% extends 'dashboard/base/base.html' %}
+{% load first_letters %}
 {% load i18n %}
 {% load static %}
 {% block Title %}
@@ -176,12 +177,22 @@
                  data-sender="{{ object.offerrequest.sender.full_name }}"
                  data-recepient="{{ object.offerrequest.recepient.full_name }}"
                  data-amount="{{ object.amount_paid }}"
-                 data-img="{{ object.receipt }}">
+                 data-img="{{ object.receipt }}"
+                 data-id="{{ object.pk }}">
                 <div class="content">
                     <div class="ui grid" style="border-bottom: lightgrey solid thin; margin-right: 28px;">
                         <div class="middle aligned column">
-                            <img src="{% static 'dashboard/img/img.png' %}" alt="avatar image"
-                                 class="ui avatar image">
+                            <div class="avatar image">
+                                <img src="{% static 'dashboard/img/img.png' %}" alt="avatar image"
+                                     class="ui centered avatar image">
+                                <div class="ui inverted tiny center aligned sub header"
+                                     style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                                        margin:0; padding: 0; color: white">
+
+                                    {{ object.offerrequest.sender.full_name | first_letters }}
+
+                                </div>
+                            </div>
                         </div>
                         <div class="two wide middle aligned column">
                             {{ object.offerrequest.sender.username }}
@@ -252,7 +263,8 @@
                     </div>
                 </div>
             </div>
-            <form class="ui fluid form" action="/dashboard/download/" id="download-file-form" method="POST">
+            <form class="ui fluid form" action="{% url 'dashboard-download-file' %}" id="download-file-form"
+                  method="POST">
                 {% csrf_token %}
                 <div class="ui grid segment container"
                      style="background-color: #E8ECEF; border: none;  cursor: pointer" id="download-img">
@@ -274,9 +286,17 @@
             </form>
         </div>
         <div class="center aligned actions">
-            <button class="ui green button" onclick="$('#receipt-modal').modal('hide');">
-                {% translate 'Accept' %}
-            </button>
+            <form action="{% url 'dashboard-view-payments' %}" id="change-payment-status-form" method="post">
+                {% csrf_token %}
+                <button class="ui green button" onclick="acceptPayment()">
+                    {% translate 'Accept' %}
+                </button>
+                <button class="ui red button" onclick="refusePayment()">
+                    {% translate 'Refuse' %}
+                </button>
+                <input type="hidden" name="payment_id" id="payment-id">
+                <input type="hidden" name="payment_status" id="payment-status">
+            </form>
         </div>
     </div>
 
