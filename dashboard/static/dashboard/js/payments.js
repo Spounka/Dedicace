@@ -25,6 +25,7 @@ function windowLoad() {
             $('#from').html(card.dataset.sender);
             $('#to').html(card.dataset.recepient);
             $('#amount').html(card.dataset.amount + " Dzd");
+            $('#payment-id').val(card.dataset.id);
             let input = document.getElementById('file-path-input');
             input.value = card.dataset.img
             $('.ui.modal').modal('show');
@@ -53,3 +54,20 @@ function clearQueries() {
     window.location.href = url.toString()
 }
 
+
+function submitForm(value) {
+    $('#payment-id').val()
+    $('#payment-status').val(value)
+    console.log(value)
+    $('submit-id-submit').submit()
+}
+
+function acceptPayment() {
+    submitForm('accept');
+    $('#receipt-modal').modal('hide');
+}
+
+function refusePayment() {
+    submitForm('refuse');
+    $('#receipt-modal').modal('hide');
+}
