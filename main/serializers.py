@@ -7,28 +7,30 @@ from rest_framework import serializers
 from .models import User, Celebrity, Client, OfferRequest, Payment, Report, PaymentInformation
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["id", "first_name", "last_name", "email", "phone_number", "username", "payment_details", 'password']
-
-
 class PaymentInformationSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-
     class Meta:
         fields = "__all__"
         model = PaymentInformation
 
 
+class UserSerializer(serializers.ModelSerializer):
+    payment_details = PaymentInformationSerializer()
+
+    class Meta:
+        model = User
+        fields = ["id", "first_name", "last_name", "email", "phone_number", "username", "payment_details", 'password']
+
+
 class ReturnUserSerializer(serializers.ModelSerializer):
+    payment_details = PaymentInformationSerializer()
+
     class Meta:
         model = User
         fields = ["id", "first_name", "last_name", "email", "phone_number", "username", "payment_details"]
 
 
 class GenereicUserModelsSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = ReturnUserSerializer()
 
     def create(self, validated_data: dict[str, Any]):
         user_data = validated_data.pop('user')
