@@ -1,17 +1,29 @@
+from __future__ import annotations
+
 from typing import Any
 
 from rest_framework import serializers
 
-from .models import User, Celebrity, Client, OfferRequest, Payment, Report
+from .models import User, Celebrity, Client, OfferRequest, Payment, Report, PaymentInformation
+
+
+class PaymentInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = "__all__"
+        model = PaymentInformation
 
 
 class UserSerializer(serializers.ModelSerializer):
+    payment_details = PaymentInformationSerializer(required=False)
+
     class Meta:
         model = User
         fields = ["id", "first_name", "last_name", "email", "phone_number", "username", "payment_details", 'password']
 
 
 class ReturnUserSerializer(serializers.ModelSerializer):
+    payment_details = PaymentInformationSerializer(required=False)
+
     class Meta:
         model = User
         fields = ["id", "first_name", "last_name", "email", "phone_number", "username", "payment_details"]
@@ -24,8 +36,11 @@ class GenereicUserModelsSerializer(serializers.ModelSerializer):
         user_data = validated_data.pop('user')
         password: str = user_data.pop('password')
         user_data['phone_number'] = User.normalize_username(user_data['phone_number'])
-        user: User = User.objects.create(**user_data)
+        payment_data = user_data.pop('payment_details')
+        payment_information = PaymentInformation.objects.create(**payment_data)
+        user: User = User.objects.create(payment_details=payment_information, **user_data)
         user.set_password(password)
+        user.save()
         client = Client.objects.create(user=user, **validated_data)
         return client
 
@@ -47,7 +62,7 @@ class GenereicUserModelsSerializer(serializers.ModelSerializer):
 class ClientSerializer(GenereicUserModelsSerializer):
     class Meta:
         model = Client
-        fields = "__all__"
+        fields = ['id', 'user', 'wilaya']
         depth = 1
 
 

@@ -56,11 +56,14 @@ class TestCreateClient(APITestCase):
     def setUp(self) -> None:
         self.data = {
             'user':   {
-                'phone_number': '0669344935',
-                'username':     'hihihi',
-                'password':     'rootuser',
-                'first_name':   'suss',
-                'last_name':    'duss'
+                'phone_number':    '0669344935',
+                'username':        'hihihi',
+                'password':        'rootuser',
+                'first_name':      'suss',
+                'last_name':       'duss',
+                'payment_details': {
+                    'address': "deal3a"
+                }
             },
             'wilaya': 34
 
@@ -145,11 +148,14 @@ class TestUserUpdate(TestCase):
 
         data = {
             'user':   {
-                'phone_number': '0669344917',
-                'username':     'test2',
-                'password':     'rootusers',
-                'first_name':   'dela3a',
-                'last_name':    'betteikha'
+                'phone_number':    '0669344917',
+                'username':        'test2',
+                'password':        'rootusers',
+                'first_name':      'dela3a',
+                'last_name':       'betteikha',
+                'payment_details': {
+                    'address': "deal3a"
+                }
             },
             'wilaya': '25'
         }
