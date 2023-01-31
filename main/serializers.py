@@ -14,7 +14,7 @@ class PaymentInformationSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    payment_details = PaymentInformationSerializer()
+    payment_details = PaymentInformationSerializer(required=False)
 
     class Meta:
         model = User
@@ -22,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ReturnUserSerializer(serializers.ModelSerializer):
-    payment_details = PaymentInformationSerializer()
+    payment_details = PaymentInformationSerializer(required=False)
 
     class Meta:
         model = User
@@ -30,13 +30,15 @@ class ReturnUserSerializer(serializers.ModelSerializer):
 
 
 class GenereicUserModelsSerializer(serializers.ModelSerializer):
-    user = ReturnUserSerializer()
+    user = UserSerializer()
 
     def create(self, validated_data: dict[str, Any]):
         user_data = validated_data.pop('user')
         password: str = user_data.pop('password')
         user_data['phone_number'] = User.normalize_username(user_data['phone_number'])
-        user: User = User.objects.create(**user_data)
+        payment_data = user_data.pop('payment_details')
+        payment_information = PaymentInformation.objects.create(**payment_data)
+        user: User = User.objects.create(payment_details=payment_information, **user_data)
         user.set_password(password)
         user.save()
         client = Client.objects.create(user=user, **validated_data)
@@ -60,7 +62,7 @@ class GenereicUserModelsSerializer(serializers.ModelSerializer):
 class ClientSerializer(GenereicUserModelsSerializer):
     class Meta:
         model = Client
-        fields = "__all__"
+        fields = ['id', 'user', 'wilaya']
         depth = 1
 
 
