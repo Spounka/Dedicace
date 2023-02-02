@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from .models import User, Celebrity, Client, OfferRequest, Payment, Report, PaymentInformation
 
@@ -36,8 +37,10 @@ class GenereicUserModelsSerializer(serializers.ModelSerializer):
         user_data = validated_data.pop('user')
         password: str = user_data.pop('password')
         user_data['phone_number'] = User.normalize_username(user_data['phone_number'])
-        payment_data = user_data.pop('payment_details')
-        payment_information = PaymentInformation.objects.create(**payment_data)
+        payment_information = None
+        if user_data.get('payment_details', None):
+            payment_data = user_data.pop('payment_details')
+            payment_information = PaymentInformation.objects.create(**payment_data)
         user: User = User.objects.create(payment_details=payment_information, **user_data)
         user.set_password(password)
         user.save()
@@ -87,10 +90,21 @@ class CelebritySerializer(GenereicUserModelsSerializer):
 
 
 class OfferRequestSerializer(serializers.ModelSerializer):
+    recepient = ReturnUserSerializer()
+
     class Meta:
         model = OfferRequest
         fields = "__all__"
-        depth = 1
+        depth = 2
+
+    def create(self, validated_data):
+        recepient_id = validated_data.pop('recepient')
+        try:
+            recepient = User.objects.get(pk=recepient_id)
+            offer = OfferRequest.objects.create(recepient=recepient, **validated_data)
+            return offer
+        except User.DoesNotExist:
+            raise ValidationError('Invalid recepient')
 
 
 class ReportSerializer(serializers.ModelSerializer):

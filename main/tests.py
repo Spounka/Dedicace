@@ -56,14 +56,14 @@ class TestCreateClient(APITestCase):
     def setUp(self) -> None:
         self.data = {
             'user':   {
-                'phone_number':    '0669344935',
-                'username':        'hihihi',
-                'password':        'rootuser',
-                'first_name':      'suss',
-                'last_name':       'duss',
-                'payment_details': {
-                    'address': "deal3a"
-                }
+                'phone_number': '0669344935',
+                'username':     'hihihi',
+                'password':     'rootuser',
+                'first_name':   'suss',
+                'last_name':    'duss',
+                # 'payment_details': {
+                #     'address': "deal3a"
+                # }
             },
             'wilaya': 34
 
@@ -243,3 +243,11 @@ class TestCelebrity(APITestCase):
 
         self.assertEqual(user_response.status_code, status.HTTP_200_OK)
         self.assertEqual(user_response.data.get('user').get('phone_number'), User.normalize_username(user.phone_number))
+
+
+class TestOfferRequests(APITestCase):
+    def setUp(self) -> None:
+        self.factory = APIRequestFactory()
+
+    def test_create_new_offer(self):
+        ...
