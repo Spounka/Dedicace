@@ -11,7 +11,8 @@ from rest_framework.serializers import ModelSerializer
 from .models import Celebrity, Client, OfferRequest, Payment, Report
 from .serializers import (
     CelebritySerializer, ClientSerializer, OfferRequestSerializer,
-    PaymentSerializer, AvailabilitySerializer, ReportSerializer
+    PaymentSerializer, AvailabilitySerializer, ReportSerializer,
+    UserSerializer
 )
 
 User = get_user_model()
@@ -65,7 +66,7 @@ def get_ttl():
 
 
 class UserCreateAPIView(generics.CreateAPIView):
-    serializer_class = ClientSerializer
+    serializer_class = UserSerializer
     model = None
 
     def create(self, request, *args, **kwargs):
@@ -158,16 +159,14 @@ class RelatedOffersReadUpdate(generics.ListCreateAPIView, mixins.RetrieveModelMi
     authentication_classes = (TokenAuthentication,)
     serializer_class = OfferRequestSerializer
 
-    def create(self, request, *args, **kwargs):
-        serializer: OfferRequestSerializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.validated_data['sender'] = request.user
-        celebrity = Celebrity.objects.filter(pk=request.data.get('recepient')).first()
-        if not celebrity:
-            return response.Response(status=status.HTTP_400_BAD_REQUEST)
-        serializer.validated_data['recepient'] = celebrity.user
-        serializer.save()
-        return response.Response(data=serializer.data, status=status.HTTP_201_CREATED)
+    # def create(self, request, *args, **kwargs):
+    #     request.data['sender'] = request.user.pk
+    #     recepient = User.objects.filter(pk=request.data['recepient']).first()
+    #     request.data['recepient'] = UserSerializer(recepient).data
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return response.Response(status=status.HTTP_201_CREATED, data=serializer.data)
 
     def get(self, request, *args, **kwargs):
         if kwargs.get('pk', None):
