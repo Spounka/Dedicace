@@ -12,7 +12,7 @@ from .models import Celebrity, Client, OfferRequest, Payment, Report
 from .serializers import (
     CelebritySerializer, ClientSerializer, OfferRequestSerializer,
     PaymentSerializer, AvailabilitySerializer, ReportSerializer,
-    UserSerializer
+    UserSerializer, CreationOfferRequestSerializer
 )
 
 User = get_user_model()
@@ -154,19 +154,19 @@ class CelebrityReadUpdateAPIView(WithUserSupportAPIView):
     model = Celebrity
 
 
-class RelatedOffersReadUpdate(generics.ListCreateAPIView, mixins.RetrieveModelMixin):
+class RelatedOffersReadUpdate(generics.ListCreateAPIView, generics.UpdateAPIView, mixins.RetrieveModelMixin):
     permission_classes = [IsAuthenticated]
     authentication_classes = (TokenAuthentication,)
     serializer_class = OfferRequestSerializer
+    queryset = OfferRequest.objects.filter()
 
-    # def create(self, request, *args, **kwargs):
-    #     request.data['sender'] = request.user.pk
-    #     recepient = User.objects.filter(pk=request.data['recepient']).first()
-    #     request.data['recepient'] = UserSerializer(recepient).data
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     return response.Response(status=status.HTTP_201_CREATED, data=serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        request.data['sender'] = request.user.pk
+        serializer = CreationOfferRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return response.Response(status=status.HTTP_201_CREATED, data=serializer.data)
 
     def get(self, request, *args, **kwargs):
         if kwargs.get('pk', None):
