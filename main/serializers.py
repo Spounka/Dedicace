@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Any
 
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
 from .models import User, Celebrity, Client, OfferRequest, Payment, Report, PaymentInformation
 
@@ -89,22 +88,20 @@ class CelebritySerializer(GenereicUserModelsSerializer):
         depth = 1
 
 
+class CreationOfferRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OfferRequest
+        fields = ["id", "sender", "recepient", "title", "description"]
+
+
 class OfferRequestSerializer(serializers.ModelSerializer):
-    recepient = ReturnUserSerializer()
+    sender = serializers.PrimaryKeyRelatedField(read_only=True)
+    recepient = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = OfferRequest
         fields = "__all__"
         depth = 2
-
-    def create(self, validated_data):
-        recepient_id = validated_data.pop('recepient')
-        try:
-            recepient = User.objects.get(pk=recepient_id)
-            offer = OfferRequest.objects.create(recepient=recepient, **validated_data)
-            return offer
-        except User.DoesNotExist:
-            raise ValidationError('Invalid recepient')
 
 
 class ReportSerializer(serializers.ModelSerializer):
