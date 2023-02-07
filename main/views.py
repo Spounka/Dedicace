@@ -158,7 +158,7 @@ class RelatedOffersReadUpdate(generics.ListCreateAPIView, generics.UpdateAPIView
     permission_classes = [IsAuthenticated]
     authentication_classes = (TokenAuthentication,)
     serializer_class = OfferRequestSerializer
-    queryset = OfferRequest.objects.filter()
+    queryset = OfferRequest.objects.all()
 
     def create(self, request, *args, **kwargs):
         data = {**request.data, 'sender': request.user.pk}
