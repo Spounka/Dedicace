@@ -161,8 +161,8 @@ class RelatedOffersReadUpdate(generics.ListCreateAPIView, generics.UpdateAPIView
     queryset = OfferRequest.objects.filter()
 
     def create(self, request, *args, **kwargs):
-        request.data['sender'] = request.user.pk
-        serializer = CreationOfferRequestSerializer(data=request.data)
+        data = {**request.data, 'sender': request.user.pk}
+        serializer = CreationOfferRequestSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return response.Response(status=status.HTTP_201_CREATED, data=serializer.data)
