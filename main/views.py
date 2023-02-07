@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth import user_logged_in, login, get_user_model
 from knox.auth import TokenAuthentication
 from knox.models import AuthToken
@@ -16,6 +18,8 @@ from .serializers import (
 )
 
 User = get_user_model()
+
+logger = logging.getLogger("__name__")
 
 
 class GetCurrentCelebFromPhone(generics.GenericAPIView):
@@ -162,9 +166,11 @@ class RelatedOffersReadUpdate(generics.ListCreateAPIView, generics.UpdateAPIView
 
     def create(self, request, *args, **kwargs):
         data = {**request.data, 'sender': request.user.pk}
+        logger.info(f'RelatedOffer Create reception data: {data}')
         serializer = CreationOfferRequestSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        logger.info(f'RelatedOffer Create serializer data: {serializer.data}')
         return response.Response(status=status.HTTP_201_CREATED, data=serializer.data)
 
     def get(self, request, *args, **kwargs):

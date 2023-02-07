@@ -108,20 +108,29 @@ LOGGING = {
     'version':                  1,
     'disable_existing_loggers': False,
     'handlers':                 {
-        'stream': {
+        'stream':    {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
         },
-        'file':   {
+        'file':      {
             'level':    'INFO',
             'class':    'logging.FileHandler',
             'filename': 'chat.log'
-        }
+        },
+        'main_file': {
+            'level':    'INFO',
+            'class':    'logging.FileHandler',
+            'filename': 'main.log'
+        },
     },
     'loggers':                  {
         'chat': {
             'level':    'INFO',
             'handlers': ['stream', 'file']
+        },
+        'main': {
+            'level':    "DEBUG",
+            'handlers': ['stream', 'main_file']
         }
     }
 }
