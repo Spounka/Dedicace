@@ -89,9 +89,18 @@ class CelebritySerializer(GenereicUserModelsSerializer):
 
 
 class CreationOfferRequestSerializer(serializers.ModelSerializer):
+    recepient = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter())
+
     class Meta:
         model = OfferRequest
-        fields = ["id", "sender", "recepient", "title", "description"]
+        fields = '__all__'
+
+    def create(self, validated_data):
+        sender = validated_data.pop('sender')
+        recepient = validated_data.pop('recepient')
+        offer_request = OfferRequest.objects.create(sender=sender, recepient=recepient, **validated_data)
+        offer_request.save()
+        return offer_request
 
 
 class OfferRequestSerializer(serializers.ModelSerializer):
