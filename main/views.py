@@ -160,7 +160,6 @@ class RelatedOffersReadUpdate(generics.ListCreateAPIView, generics.UpdateAPIView
     serializer_class = OfferRequestSerializer
     queryset = OfferRequest.objects.filter()
 
-
     def create(self, request, *args, **kwargs):
         request.data['sender'] = request.user.pk
         serializer = CreationOfferRequestSerializer(data=request.data)

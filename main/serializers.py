@@ -95,9 +95,6 @@ class CreationOfferRequestSerializer(serializers.ModelSerializer):
 
 
 class OfferRequestSerializer(serializers.ModelSerializer):
-    sender = serializers.PrimaryKeyRelatedField(read_only=True)
-    recepient = serializers.PrimaryKeyRelatedField(read_only=True)
-
     class Meta:
         model = OfferRequest
         fields = "__all__"
