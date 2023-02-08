@@ -11,7 +11,7 @@ urlpatterns = [
     path(r'client/<int:pk>/', views.ClientReadUpdateDestroyAPIView.as_view(), name="client-rud"),
     path(r'client/offers/', views.RelatedOffersReadUpdate.as_view(), name="client-offers"),
     path(r'client/offers/<int:pk>/', views.RelatedOffersReadUpdate.as_view(), name="client-offers"),
-    path(r'celebs/offers/<int:pk>/payment/', views.ViewOfferRequestPayment.as_view(), name="celeb-offer-payment"),
+    path(r'client/offers/<int:pk>/payment/', views.ViewOfferRequestPayment.as_view(), name="celeb-offer-payment"),
     path(r'client/payments/', views.PaymentAPIView.as_view(), name="client-payments"),
     path(r'client/payments/<int:pk>/', views.PaymentAPIView.as_view(), name="client-payment-id"),
 
