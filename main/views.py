@@ -225,8 +225,6 @@ class ViewOfferRequestPayment(generics.RetrieveUpdateAPIView):
             return response.Response(status=status.HTTP_404_NOT_FOUND)
         if offer.recepient != request.user:
             return response.Response(status=status.HTTP_403_FORBIDDEN)
-        if not hasattr(offer, "payment"):
-            return response.Response(data={"message": "Offer has no payment yet"}, status=status.HTTP_400_BAD_REQUEST)
         payment_serializer = PaymentSerializer(offer.payment)
         return response.Response(data=payment_serializer.data, status=status.HTTP_200_OK)
 
