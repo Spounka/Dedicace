@@ -162,8 +162,12 @@ class CelebrityReadUpdateAPIView(WithUserSupportAPIView):
 class RelatedOffersReadUpdate(generics.ListCreateAPIView, generics.UpdateAPIView, mixins.RetrieveModelMixin):
     permission_classes = [IsAuthenticated]
     authentication_classes = (TokenAuthentication,)
-    serializer_class = CreationOfferRequestSerializer
     queryset = OfferRequest.objects.all()
+
+    def get_queryset(self):
+        if self.request.method == 'POST':
+            return CreationOfferRequestSerializer
+        return OfferRequestSerializer
 
     def get(self, request, *args, **kwargs):
         if kwargs.get('pk', None):
