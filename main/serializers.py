@@ -93,21 +93,24 @@ class CreationOfferRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OfferRequest
-        fields = '__all__'
+        exclude = ['sender']
+        depth = 1
 
     def create(self, validated_data):
-        sender = validated_data.pop('sender')
-        recepient = validated_data.pop('recepient')
-        offer_request = OfferRequest.objects.create(sender=sender, recepient=recepient, **validated_data)
+        validated_data['sender'] = self.context['request'].user
+        offer_request = OfferRequest.objects.create(**validated_data)
         offer_request.save()
         return offer_request
 
 
 class OfferRequestSerializer(serializers.ModelSerializer):
+    sender = ReturnUserSerializer()
+    recepient = ReturnUserSerializer()
+
     class Meta:
         model = OfferRequest
         fields = "__all__"
-        depth = 2
+        depth = 1
 
 
 class ReportSerializer(serializers.ModelSerializer):
