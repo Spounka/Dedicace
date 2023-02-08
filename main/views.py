@@ -165,9 +165,17 @@ class RelatedOffersReadUpdate(generics.ListCreateAPIView, generics.UpdateAPIView
     queryset = OfferRequest.objects.all()
 
     def get_serializer_class(self):
-        if self.request.method == 'POST':
-            return CreationOfferRequestSerializer
-        return OfferRequestSerializer
+        if self.request.method == 'GET':
+            return OfferRequestSerializer
+        return CreationOfferRequestSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return_data = OfferRequestSerializer(serializer.instance)
+        return response.Response(return_data.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def get(self, request, *args, **kwargs):
         if kwargs.get('pk', None):
