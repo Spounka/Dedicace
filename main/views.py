@@ -98,9 +98,9 @@ class WithUserSupportAPIView(generics.RetrieveUpdateDestroyAPIView):
     model = None
 
     def update(self, request, *args, **kwargs):
-        if not self.is_editing_self(request, args, kwargs):
+        if not self.is_editing_self(request, *args, **kwargs):
             return response.Response(status=status.HTTP_403_FORBIDDEN)
-        return super().update(request, args, kwargs)
+        return super().update(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
         if not self.is_editing_self(request, args, kwargs):
