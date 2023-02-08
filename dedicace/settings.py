@@ -13,9 +13,6 @@ import datetime
 import os
 from pathlib import Path
 
-import dj_database_url
-import whitenoise.storage
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -52,7 +49,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -119,7 +115,7 @@ LOGGING = {
             'filename': 'main.log'
         },
     },
-    'loggers': {
+    'loggers':                  {
         'chat': {
             'level':    'INFO',
             'handlers': ['stream', 'file']
@@ -137,7 +133,14 @@ WSGI_APPLICATION = 'dedicace.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.parse("postgres://postgres:cfPqoXAeNS8zwAa@dedicace-db.internal:5433/dedicace")
+    'default': {
+        'ENGINE':   'django.db.backends.postgresql',
+        'NAME':     os.environ.get("POSTGRES_DB", 'Dedicace'),
+        'USER':     os.environ.get("POSTGRES_USER", 'spounka'),
+        'PASSWORD': os.environ.get("POSTGRES_PASSWORD", 'pass123'),
+        'HOST':     os.environ.get("POSTGRES_HOST", 'localhost'),
+        'PORT':     5432,
+    }
 }
 
 # Password validation
@@ -187,5 +190,3 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-FILE_UPLOAD_PERMISSIONS = 0o644
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
