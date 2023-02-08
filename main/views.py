@@ -5,6 +5,7 @@ from knox.auth import TokenAuthentication
 from knox.models import AuthToken
 from knox.settings import knox_settings
 from rest_framework import generics, mixins, response, status
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.fields import DateTimeField
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
@@ -23,7 +24,14 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
+class CSRFExempt(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return
+
+
 class GetCurrentCelebFromPhone(generics.GenericAPIView):
+    authentication_classes = (CSRFExempt,)
+
     def post(self, request, *args, **kwargs):
         phone_number = request.data.get('phone_number', None)
         if not phone_number:
@@ -39,7 +47,7 @@ class GetCurrentCelebFromPhone(generics.GenericAPIView):
             user_logged_in.send(sender=request.user.__class__,
                                 request=request, user=request.user)
             return response.Response(status=status.HTTP_200_OK,
-                                     data={'token': token, **CelebritySerializer(celebrity).data})
+                                     data={'token': token, 'celebrity': CelebritySerializer(celebrity).data})
         except (User.DoesNotExist, Celebrity.DoesNotExist):
             return response.Response(status=status.HTTP_404_NOT_FOUND,
                                      data={"message": "no celebrity with that phone number found"})
