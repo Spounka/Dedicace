@@ -164,7 +164,7 @@ class RelatedOffersReadUpdate(generics.ListCreateAPIView, generics.UpdateAPIView
     authentication_classes = (TokenAuthentication,)
     queryset = OfferRequest.objects.all()
 
-    def get_queryset(self):
+    def get_serializer_class(self):
         if self.request.method == 'POST':
             return CreationOfferRequestSerializer
         return OfferRequestSerializer
