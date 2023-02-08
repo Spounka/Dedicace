@@ -240,7 +240,7 @@ class ViewOfferRequestPayment(generics.RetrieveUpdateAPIView):
         offer = OfferRequest.objects.filter(pk=kwargs.get('pk')).first()
         if request.user != offer.sender or request.user != offer.recepient:
             return response.Response(status=status.HTTP_403_FORBIDDEN)
-        return super().partial_update(request, args, kwargs)
+        return super().partial_update(request, *args, **kwargs)
 
 
 class ReportAPIView(generics.ListCreateAPIView, mixins.RetrieveModelMixin):
