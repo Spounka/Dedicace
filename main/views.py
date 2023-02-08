@@ -5,6 +5,7 @@ from knox.auth import TokenAuthentication
 from knox.models import AuthToken
 from knox.settings import knox_settings
 from rest_framework import generics, mixins, response, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.fields import DateTimeField
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
@@ -19,7 +20,8 @@ from .serializers import (
 
 User = get_user_model()
 
-logger = logging.getLogger("__name__")
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class GetCurrentCelebFromPhone(generics.GenericAPIView):
@@ -168,10 +170,15 @@ class RelatedOffersReadUpdate(generics.ListCreateAPIView, generics.UpdateAPIView
         data = {**request.data, 'sender': request.user.pk}
         logger.info(f'RelatedOffer Create reception data: {data}')
         serializer = CreationOfferRequestSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        logger.info(f'RelatedOffer Create serializer data: {serializer.data}')
-        return response.Response(status=status.HTTP_201_CREATED, data=serializer.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            logger.info(f'RelatedOffer Create serializer data: {serializer.data}')
+            return response.Response(status=status.HTTP_201_CREATED, data=serializer.data)
+        except ValidationError:
+            logger.info(f'RelatedOffer Create serializer errors: {serializer.errors}')
+            request.data['sender'] = data['sender']
+            return super().create(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         if kwargs.get('pk', None):
