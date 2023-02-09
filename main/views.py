@@ -249,7 +249,7 @@ class ViewOfferRequestPayment(generics.RetrieveUpdateAPIView):
         partial = kwargs.pop('partial', False)
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         if serializer.is_valid():
-            file_field = request.FILES.get('receipt')
+            file_field = request.FILES.get('image')
             if file_field:
                 serializer.validated_data['receipt'] = file_field
             self.perform_update(serializer)
