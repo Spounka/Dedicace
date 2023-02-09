@@ -47,7 +47,7 @@ class GetCurrentCelebFromPhone(generics.GenericAPIView):
             user_logged_in.send(sender=request.user.__class__,
                                 request=request, user=request.user)
             return response.Response(status=status.HTTP_200_OK,
-                                     data={'token': token, 'id': CelebritySerializer(celebrity).data.get('pk')})
+                                     data={'token': token, 'id': CelebritySerializer(celebrity).data.get('id')})
         except (User.DoesNotExist, Celebrity.DoesNotExist):
             return response.Response(status=status.HTTP_404_NOT_FOUND,
                                      data={"message": "no celebrity with that phone number found"})
