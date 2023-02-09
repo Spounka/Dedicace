@@ -47,7 +47,9 @@ class GenereicUserModelsSerializer(serializers.ModelSerializer):
         return client
 
     def update(self, instance: Client | Celebrity, validated_data: dict[str, Any]):
-        user_data = validated_data.pop('user')
+        user_data = validated_data.pop('user', None)
+        if not user_data:
+            raise ValidationError('No user found')
         user = instance.user
         user.username = user_data.get('username', user.username)
         user.first_name = user_data.get('first_name', user.first_name)
