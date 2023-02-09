@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import datetime
 from typing import Any
 
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from .models import User, Celebrity, Client, OfferRequest, Payment, Report, PaymentInformation
 
@@ -47,7 +49,9 @@ class GenereicUserModelsSerializer(serializers.ModelSerializer):
         return client
 
     def update(self, instance: Client | Celebrity, validated_data: dict[str, Any]):
-        user_data = validated_data.pop('user')
+        user_data = validated_data.pop('user', None)
+        if not user_data:
+            raise ValidationError('No user found')
         user = instance.user
         user.username = user_data.get('username', user.username)
         user.first_name = user_data.get('first_name', user.first_name)
@@ -99,6 +103,10 @@ class CreationOfferRequestSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['sender'] = self.context['request'].user
         offer_request = OfferRequest.objects.create(**validated_data)
+        current_time = datetime.datetime.now().timestamp()
+        payment = Payment.objects.create(amount_paid=offer_request.recepient.celebrity.price, payment_date=current_time)
+        payment.save()
+        offer_request.payment = payment
         offer_request.save()
         return offer_request
 

@@ -5,6 +5,7 @@ from knox.auth import TokenAuthentication
 from knox.models import AuthToken
 from knox.settings import knox_settings
 from rest_framework import generics, mixins, response, status
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.fields import DateTimeField
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
@@ -23,7 +24,14 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
+class CSRFExempt(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return
+
+
 class GetCurrentCelebFromPhone(generics.GenericAPIView):
+    authentication_classes = (CSRFExempt,)
+
     def post(self, request, *args, **kwargs):
         phone_number = request.data.get('phone_number', None)
         if not phone_number:
@@ -39,7 +47,7 @@ class GetCurrentCelebFromPhone(generics.GenericAPIView):
             user_logged_in.send(sender=request.user.__class__,
                                 request=request, user=request.user)
             return response.Response(status=status.HTTP_200_OK,
-                                     data={'token': token, **CelebritySerializer(celebrity).data})
+                                     data={'token': token, 'celebrity': CelebritySerializer(celebrity).data})
         except (User.DoesNotExist, Celebrity.DoesNotExist):
             return response.Response(status=status.HTTP_404_NOT_FOUND,
                                      data={"message": "no celebrity with that phone number found"})
@@ -236,11 +244,22 @@ class ViewOfferRequestPayment(generics.RetrieveUpdateAPIView):
         payment_serializer = PaymentSerializer(offer.payment)
         return response.Response(data=payment_serializer.data, status=status.HTTP_200_OK)
 
-    def partial_update(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         offer = OfferRequest.objects.filter(pk=kwargs.get('pk')).first()
-        if request.user != offer.sender or request.user != offer.recepient:
+        if request.user not in [offer.sender, offer.recepient]:
             return response.Response(status=status.HTTP_403_FORBIDDEN)
-        return super().partial_update(request, *args, **kwargs)
+
+        instance = self.get_object()
+        partial = kwargs.pop('partial', False)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if serializer.is_valid():
+            file_field = request.FILES.get('receipt')
+            if file_field:
+                serializer.validated_data['receipt'] = file_field
+            self.perform_update(serializer)
+            return response.Response(status=status.HTTP_200_OK, data=serializer.data)
+
+        return response.Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
 
 
 class ReportAPIView(generics.ListCreateAPIView, mixins.RetrieveModelMixin):
