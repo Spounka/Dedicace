@@ -244,7 +244,7 @@ class ViewOfferRequestPayment(generics.RetrieveUpdateAPIView):
         payment_serializer = PaymentSerializer(offer.payment)
         return response.Response(data=payment_serializer.data, status=status.HTTP_200_OK)
 
-    def partial_update(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         offer = OfferRequest.objects.filter(pk=kwargs.get('pk')).first()
         if request.user != offer.sender or request.user != offer.recepient:
             return response.Response(status=status.HTTP_403_FORBIDDEN)
