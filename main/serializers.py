@@ -103,8 +103,7 @@ class CreationOfferRequestSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['sender'] = self.context['request'].user
         offer_request = OfferRequest.objects.create(**validated_data)
-        current_time = datetime.datetime.now().timestamp()
-        payment = Payment.objects.create(amount_paid=offer_request.recepient.celebrity.price, payment_date=current_time)
+        payment = Payment.objects.create(amount_paid=offer_request.recepient.celebrity.price)
         payment.save()
         offer_request.payment = payment
         offer_request.save()
