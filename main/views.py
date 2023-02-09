@@ -248,7 +248,18 @@ class ViewOfferRequestPayment(generics.RetrieveUpdateAPIView):
         offer = OfferRequest.objects.filter(pk=kwargs.get('pk')).first()
         if request.user not in [offer.sender, offer.recepient]:
             return response.Response(status=status.HTTP_403_FORBIDDEN)
-        return super().partial_update(request, *args, **kwargs)
+
+        instance = self.get_object()
+        partial = kwargs.pop('partial', False)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if serializer.is_valid():
+            file_field = request.FILES.get('receipt')
+            if file_field:
+                serializer.validated_data['receipt'] = file_field
+            self.perform_update(serializer)
+            return response.Response(status=status.HTTP_200_OK, data=serializer.data)
+
+        return response.Response(status=status.HTTP_400_BAD_REQUEST, data=serializer.errors)
 
 
 class ReportAPIView(generics.ListCreateAPIView, mixins.RetrieveModelMixin):
