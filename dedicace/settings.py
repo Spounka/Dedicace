@@ -137,14 +137,7 @@ WSGI_APPLICATION = 'dedicace.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE':   'django.db.backends.postgresql',
-        'NAME':     os.environ.get("POSTGRES_DB", 'Dedicace'),
-        'USER':     os.environ.get("POSTGRES_USER", 'spounka'),
-        'PASSWORD': os.environ.get("POSTGRES_PASSWORD", 'pass123'),
-        'HOST':     os.environ.get("POSTGRES_HOST", 'localhost'),
-        'PORT':     5432,
-    }
+    'default': dj_database_url.parse("postgres://postgres:cfPqoXAeNS8zwAa@dedicace-db.internal:5433/dedicace")
 }
 
 # Password validation
