@@ -28,10 +28,11 @@ SECRET_KEY = 'django-insecure-&_*hcuw7w45=i4-5=%((h2efryk8_^(eqzb*q-2x2*_5%_i*tt
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", 'dedicace.fly.dev']
+ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://dedicace.fly.dev'
+    'https://dedicace.fly.dev',
+    'https://41a1-105-235-136-72.eu.ngrok.io',
 ]
 
 # Application definition
