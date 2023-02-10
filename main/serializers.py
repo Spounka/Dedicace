@@ -59,7 +59,8 @@ class GenereicUserModelsSerializer(serializers.ModelSerializer):
         if (password := user_data.get('password', None)) is not None:
             user.set_password(password)
         user.save()
-        instance.wilaya = validated_data.get('wilaya', instance.wilaya)
+        if hasattr(instance, "wilaya"):
+            instance.wilaya = validated_data.get('wilaya', instance.wilaya)
         instance.save()
         return instance
 
