@@ -245,15 +245,11 @@ class ViewOfferRequestPayment(generics.RetrieveUpdateAPIView):
         return response.Response(data=payment_serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
-        offer = OfferRequest.objects.filter(pk=kwargs.get('pk')).first()
-        if request.user not in [offer.sender, offer.recepient]:
-            return response.Response(status=status.HTTP_403_FORBIDDEN)
-
         instance = self.get_object()
         partial = kwargs.pop('partial', False)
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         if serializer.is_valid():
-            file_field = request.FILES.get('receipt')
+            file_field = request.FILES.get('image')
             if file_field:
                 serializer.validated_data['receipt'] = file_field
             self.perform_update(serializer)
