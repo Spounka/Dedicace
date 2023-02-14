@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '&)df!la*9g7d+ul-qlrlq@$!gmrf(wk0#*7@^(k&r#pi5t+#bb'
+SECRET_KEY = 'django-insecure-&_*hcuw7w45=i4-5=%((h2efryk8_^(eqzb*q-2x2*_5%_i*tt'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -103,20 +103,29 @@ LOGGING = {
     'version':                  1,
     'disable_existing_loggers': False,
     'handlers':                 {
-        'stream': {
+        'stream':    {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
         },
-        'file':   {
+        'file':      {
             'level':    'INFO',
             'class':    'logging.FileHandler',
             'filename': 'chat.log'
-        }
+        },
+        'main_file': {
+            'level':    'INFO',
+            'class':    'logging.FileHandler',
+            'filename': 'main.log'
+        },
     },
     'loggers':                  {
         'chat': {
             'level':    'INFO',
             'handlers': ['stream', 'file']
+        },
+        'main': {
+            'level':    "DEBUG",
+            'handlers': ['stream', 'main_file']
         }
     }
 }

@@ -1,10 +1,27 @@
-FROM python:3.10.7-bullseye
+ARG PYTHON_VERSION=3.10-slim-buster
 
-ENV PYTHONUNBERFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
+FROM python:${PYTHON_VERSION}
 
-WORKDIR /code/
-COPY requirements.txt .
-RUN pip3 install -r requirements.txt
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-COPY . /code
+RUN mkdir -p /code
+
+WORKDIR /code
+
+COPY requirements.txt /tmp/requirements.txt
+
+RUN set -ex && \
+    pip install --upgrade pip && \
+    pip install -r /tmp/requirements.txt && \
+    rm -rf /root/.cache/
+
+COPY . /code/
+
+
+RUN python manage.py collectstatic --noinput
+
+EXPOSE 8000
+
+# replace demo.wsgi with <project_name>.wsgi
+CMD ["gunicorn", "--bind", ":8000", "--workers", "3", "dedicace.wsgi"]
