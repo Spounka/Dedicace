@@ -29,7 +29,6 @@ ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://dedicace.fly.dev',
-    'https://41a1-105-235-136-72.eu.ngrok.io',
 ]
 
 # Application definition
