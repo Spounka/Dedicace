@@ -29,7 +29,6 @@ ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://dedicace.fly.dev',
-    'https://41a1-105-235-136-72.eu.ngrok.io',
 ]
 
 # Application definition
@@ -139,7 +138,7 @@ DATABASES = {
         'NAME':     os.environ.get("POSTGRES_DB", 'Dedicace'),
         'USER':     os.environ.get("POSTGRES_USER", 'spounka'),
         'PASSWORD': os.environ.get("POSTGRES_PASSWORD", 'pass123'),
-        'HOST':     os.environ.get("POSTGRES_HOST", 'localhost'),
+        'HOST':     os.environ.get("POSTGRES_HOST", 'db'),
         'PORT':     5432,
     }
 }
