@@ -138,7 +138,7 @@ WSGI_APPLICATION = 'dedicace.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.parse("postgres://postgres:cfPqoXAeNS8zwAa@dedicace-db.internal:5433/dedicace")
+    'default': dj_database_url.parse("postgres://postgres:eDsy9HhD1EW4rc4@dedicace-db.internal:5432/dedicace")
 }
 
 # Password validation
