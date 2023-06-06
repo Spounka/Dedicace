@@ -33,6 +33,9 @@ class ReturnUserSerializer(serializers.ModelSerializer):
 class GenereicUserModelsSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
+    class Meta:
+        model = None
+
     def create(self, validated_data: dict[str, Any]):
         user_data = validated_data.pop('user')
         password: str = user_data.pop('password')
@@ -44,8 +47,8 @@ class GenereicUserModelsSerializer(serializers.ModelSerializer):
         user: User = User.objects.create(payment_details=payment_information, **user_data)
         user.set_password(password)
         user.save()
-        client = Client.objects.create(user=user, **validated_data)
-        return client
+        instance = self.Meta.model.objects.create(user=user, **validated_data)
+        return instance
 
     def update(self, instance: Client | Celebrity, validated_data: dict[str, Any]):
         user_data = validated_data.pop('user', None)
@@ -58,6 +61,12 @@ class GenereicUserModelsSerializer(serializers.ModelSerializer):
         user.email = user_data.get('email', user.email)
         if (password := user_data.get('password', None)) is not None:
             user.set_password(password)
+        if user_data.get('payment_details', None):
+            payment_data = user_data.pop('payment_details')
+            if not user.payment_details:
+                PaymentInformation.objects.create(user=user, **payment_data)
+            else:
+                user.payment_details.objects.update(**payment_data)
         user.save()
         if hasattr(instance, "wilaya"):
             instance.wilaya = validated_data.get('wilaya', instance.wilaya)
