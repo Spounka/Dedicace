@@ -141,6 +141,24 @@ class TestCreateClient(APITestCase):
 
 
 class TestUserUpdate(TestCase):
+
+    def setUp(self) -> None:
+        self.data = {
+            'user':   {
+                'phone_number': '0669344935',
+                'username':     'hihihi',
+                'password':     'rootuser',
+                'first_name':   'suss',
+                'last_name':    'duss',
+                # 'payment_details': {
+                #     'address': "deal3a"
+                # }
+            },
+            'wilaya': 34
+
+        }
+        self.response: Response = self.client.post(reverse_lazy('client-create'), data=self.data, format='json')
+
     def test_user_updates_successfully(self):
         user = User.objects.create_user(username='test', phone_number='0669344917', email='something@something.com',
                                         password='rootuser')
@@ -172,6 +190,9 @@ class TestUserUpdate(TestCase):
         self.assertEqual(response.data.get('user').get('first_name'), data.get('user').get('first_name'))
         self.assertEqual(response.data.get('wilaya'), data.get('wilaya'))
 
+        self.assertEqual(response.data.get('user').get('payment_details').get('address'),
+                         data.get('user').get('payment_details').get('address'))
+
         self.assertEqual(client.user.username, data.get('user').get('username'))
         self.assertEqual(client.wilaya, data.get('wilaya'))
 
@@ -196,14 +217,14 @@ class TestUserUpdate(TestCase):
 class TestCelebrity(APITestCase):
     def test_get_celeb_using_phone_passes(self):
         user = User.objects.create_user(phone_number="0669344917", email="admin@admin.com", password="rootuser")
-        Celebrity.objects.create(user=user, price=0.0, description="")
+        celeb = Celebrity.objects.create(user=user, price=0.0, description="")
 
         response = self.client.post(path=reverse_lazy('celeb-from-phone'), data={"phone_number": user.phone_number},
                                     format='json')
-        normalized_phone = User.normalize_username(user.phone_number)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data.get('user').get('phone_number'), normalized_phone)
+        self.assertIsNotNone(response.data.get('token'))
+        self.assertEqual(response.data.get('celebrity').get('id'), celeb.id)
 
     def test_get_celeb_using_no_phone_fails(self):
         response = self.client.post(path=reverse_lazy('celeb-from-phone'), data={"phone_number": ""},
