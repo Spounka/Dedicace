@@ -82,6 +82,10 @@ class PaymentInformation(models.Model):
         return f"{self.ccp}"
 
 
+def profile_picture_upload_dir(instance: 'User', filename: str) -> str:
+    return f'{instance.username}/images/Profile_{filename}'
+
+
 class User(AbstractUser):
     username_validator = UnicodeUsernameValidator()
     username = models.CharField(
@@ -100,6 +104,8 @@ class User(AbstractUser):
 
     phone_number = models.CharField(default="+213", max_length=20, unique=True)
     payment_details = models.OneToOneField(PaymentInformation, on_delete=models.SET_NULL, null=True, blank=True)
+
+    profile_picture = models.ImageField(upload_to=profile_picture_upload_dir, null=True, blank=True)
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "phone_number"
