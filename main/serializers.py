@@ -16,22 +16,27 @@ class PaymentInformationSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     payment_details = PaymentInformationSerializer(required=False)
+    profile_picture = serializers.FileField(required=False)
 
     class Meta:
         model = User
-        fields = ["id", "first_name", "last_name", "email", "phone_number", "username", "payment_details", 'password']
+        fields = ["id", "first_name", "last_name", "email", "phone_number", "username", "payment_details",
+                  'profile_picture', 'password']
 
 
 class ReturnUserSerializer(serializers.ModelSerializer):
     payment_details = PaymentInformationSerializer(required=False)
+    profile_picture = serializers.FileField(required=False)
 
     class Meta:
         model = User
-        fields = ["id", "first_name", "last_name", "email", "phone_number", "username", "payment_details"]
+        fields = ["id", "first_name", "last_name", "email", "phone_number", "username", "profile_picture",
+                  "payment_details"]
 
 
 class GenereicUserModelsSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+    password = serializers.CharField(required=False)
 
     class Meta:
         model = None
@@ -59,6 +64,7 @@ class GenereicUserModelsSerializer(serializers.ModelSerializer):
         user.first_name = user_data.get('first_name', user.first_name)
         user.last_name = user_data.get('last_name', user.last_name)
         user.email = user_data.get('email', user.email)
+        user.profile_picture = user_data.get('profile_picture', user.profile_picture)
         if (password := user_data.get('password', None)) is not None:
             user.set_password(password)
         if user_data.get('payment_details', None):
