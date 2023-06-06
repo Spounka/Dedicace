@@ -174,6 +174,10 @@ def get_user_receipt_upload_folder(instance, filename):
     return f'payments/{instance.payment_date}/{filename}'
 
 
+def get_date_as_long(*_, **__):
+    return datetime.datetime.now().timestamp()
+
+
 class Payment(models.Model):
     PENDING = 'pending'
     CONFIRMED = 'confirmed'
@@ -188,7 +192,7 @@ class Payment(models.Model):
     ]
 
     amount_paid = models.FloatField(default=0.0)
-    payment_date = models.PositiveIntegerField(default=0)
+    payment_date = models.PositiveIntegerField(default=get_date_as_long)
     is_valid = models.BooleanField(default=False)
     receipt = models.ImageField(upload_to=get_user_receipt_upload_folder)
     payment_status = models.CharField(choices=STATUS_CHOICES, default=PENDING, max_length=10)
@@ -198,7 +202,7 @@ class Payment(models.Model):
 
     @property
     def get_date_from_long(self):
-        return datetime.datetime.fromtimestamp(self.payment_date / 1000.0)
+        return datetime.datetime.fromtimestamp(self.payment_date)
 
 
 class OfferRequest(models.Model):
