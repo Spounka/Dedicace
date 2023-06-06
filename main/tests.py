@@ -217,14 +217,14 @@ class TestUserUpdate(TestCase):
 class TestCelebrity(APITestCase):
     def test_get_celeb_using_phone_passes(self):
         user = User.objects.create_user(phone_number="0669344917", email="admin@admin.com", password="rootuser")
-        Celebrity.objects.create(user=user, price=0.0, description="")
+        celeb = Celebrity.objects.create(user=user, price=0.0, description="")
 
         response = self.client.post(path=reverse_lazy('celeb-from-phone'), data={"phone_number": user.phone_number},
                                     format='json')
-        normalized_phone = User.normalize_username(user.phone_number)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data.get('user').get('phone_number'), normalized_phone)
+        self.assertIsNotNone(response.data.get('token'))
+        self.assertEqual(response.data.get('celebrity').get('id'), celeb.id)
 
     def test_get_celeb_using_no_phone_fails(self):
         response = self.client.post(path=reverse_lazy('celeb-from-phone'), data={"phone_number": ""},
