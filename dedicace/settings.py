@@ -66,7 +66,7 @@ REST_FRAMEWORK = {
 
 REST_KNOX = {
     'AUTO_REFRESH': True,
-    'TOKEN_TTL':    datetime.timedelta(days=90)
+    'TOKEN_TTL': datetime.timedelta(days=90)
 }
 
 AUTHENTICATION_BACKENDS = [
@@ -79,13 +79,13 @@ ROOT_URLCONF = 'dedicace.urls'
 
 TEMPLATES = [
     {
-        'BACKEND':  'django.template.backends.django.DjangoTemplates',
-        'DIRS':     [
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
             BASE_DIR / 'templates',
             BASE_DIR / 'dashboard/templates'
         ],
         'APP_DIRS': True,
-        'OPTIONS':  {
+        'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
@@ -97,31 +97,31 @@ TEMPLATES = [
 ]
 
 LOGGING = {
-    'version':                  1,
+    'version': 1,
     'disable_existing_loggers': False,
-    'handlers':                 {
-        'stream':    {
+    'handlers': {
+        'stream': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
         },
-        'file':      {
-            'level':    'INFO',
-            'class':    'logging.FileHandler',
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
             'filename': 'chat.log'
         },
         'main_file': {
-            'level':    'INFO',
-            'class':    'logging.FileHandler',
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
             'filename': 'main.log'
         },
     },
-    'loggers':                  {
+    'loggers': {
         'chat': {
-            'level':    'INFO',
+            'level': 'INFO',
             'handlers': ['stream', 'file']
         },
         'main': {
-            'level':    "DEBUG",
+            'level': "DEBUG",
             'handlers': ['stream', 'main_file']
         }
     }
@@ -134,12 +134,12 @@ WSGI_APPLICATION = 'dedicace.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE':   'django.db.backends.postgresql',
-        'NAME':     os.environ.get("POSTGRES_DB", 'Dedicace'),
-        'USER':     os.environ.get("POSTGRES_USER", 'spounka'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get("POSTGRES_DB", 'Dedicace'),
+        'USER': os.environ.get("POSTGRES_USER", 'spounka'),
         'PASSWORD': os.environ.get("POSTGRES_PASSWORD", 'pass123'),
-        'HOST':     os.environ.get(os.environ.get("POSTGRES_HOST", 'db'), 'localhost'),
-        'PORT':     5432,
+        'HOST': os.environ.get(os.environ.get("db", os.environ.get('POSTGRES_DB', 'localhost')), '172.23.0.2'),
+        'PORT': 5432,
     }
 }
 
