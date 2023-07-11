@@ -70,7 +70,7 @@ REST_FRAMEWORK = {
 
 REST_KNOX = {
     'AUTO_REFRESH': True,
-    'TOKEN_TTL':    datetime.timedelta(days=90)
+    'TOKEN_TTL': datetime.timedelta(days=90)
 }
 
 AUTHENTICATION_BACKENDS = [

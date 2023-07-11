@@ -92,10 +92,10 @@ class MessageInfoSerializer(serializers.ModelSerializer):
         if (textmessage := validated_data.pop('textmessage', None)) is not None:
             message_info = models.ChatMessageInfo.objects.create(discussion=discussion, **validated_data)
             models.TextMessage.objects.create(message_info=message_info, **textmessage)
-        elif (imagemessage := validated_data.get('imagemessage', None)) is not None:
+        elif (imagemessage := validated_data.pop('imagemessage', None)) is not None:
             message_info = models.ChatMessageInfo.objects.create(discussion=discussion, **validated_data)
             models.ImageMessage.objects.create(message_info=message_info, **imagemessage)
-        elif (voicemessage := validated_data.get('voicemessage', None)) is not None:
+        elif (voicemessage := validated_data.pop('voicemessage', None)) is not None:
             message_info = models.ChatMessageInfo.objects.create(discussion=discussion, **validated_data)
             models.VoiceMessage.objects.create(message_info=message_info, **voicemessage)
         else:
