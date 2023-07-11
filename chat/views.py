@@ -46,8 +46,8 @@ class MessageInfoAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = (TokenAuthentication,)
     serializer_class = serializers.MessageInfoSerializer
-    queryset = models.ChatMessageInfo.objects.get
+    queryset = models.ChatMessageInfo.objects.all()
 
-    def create(self, request: WSGIRequest, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         request.data['sender'] = request.user.pk
         return super().create(request, *args, **kwargs)
