@@ -183,22 +183,24 @@ class RelatedOffersReadUpdate(generics.ListCreateAPIView, generics.UpdateAPIView
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return_data = OfferRequestSerializer(serializer.instance)
-        return response.Response(return_data.data, status=status.HTTP_201_CREATED, headers=headers)
+        return response.Response(return_data.data, status=status.HTTP_201_CREATED,
+                                 headers=headers)
 
     def get(self, request, *args, **kwargs):
         if kwargs.get('pk', None):
-            if OfferRequest.objects.get(pk=kwargs['pk']).sender != request.user:
+            offer = OfferRequest.objects.get(pk=kwargs.get('pk'))
+            if offer.sender != request.user and offer.recepient != request.user:
                 return response.Response(status=status.HTTP_403_FORBIDDEN)
             return super().retrieve(request, args, kwargs)
         return super().get(request, args, kwargs)
 
     def list(self, request, *args, **kwargs):
-        if request.user.is_client():
-            offers = OfferRequest.objects.filter(sender=request.user)
+        if request.user.is_celebrity():
+            offers = OfferRequest.objects.filter(recepient=request.user)
             serializer = OfferRequestSerializer(offers, many=True)
             return response.Response(data=serializer.data, status=status.HTTP_200_OK)
-        elif request.user.is_celebrity():
-            offers = OfferRequest.objects.filter(recepient=request.user)
+        if request.user.is_client():
+            offers = OfferRequest.objects.filter(sender=request.user)
             serializer = OfferRequestSerializer(offers, many=True)
             return response.Response(data=serializer.data, status=status.HTTP_200_OK)
         return response.Response(status=status.HTTP_403_FORBIDDEN)
